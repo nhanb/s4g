@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 )
@@ -26,7 +27,11 @@ func main() {
 	meta := readSiteMetadata(fsys)
 	fmt.Println("Found site:", meta)
 
-	findPosts(fsys)
+	articles := findArticles(fsys)
+	fmt.Printf("Found %d articles:\n", len(articles))
+	for _, a := range articles {
+		fmt.Println(">", a.Path, "-", a.Meta.Title)
+	}
 
 	println("Serving local website at http://localhost:" + port)
 	http.Handle("/", http.FileServer(http.FS(fsys)))
@@ -51,19 +56,50 @@ func readSiteMetadata(fsys fs.FS) (sm SiteMetadata) {
 
 type Article struct {
 	Path     string
-	Title    string
 	DjotBody string
+	Meta     ArticleMetadata
 }
-type Post Article
-type Page Article
 
-func findPosts(fsys fs.FS) (posts []Post) {
-	var paths []string
+type ArticleMetadata struct {
+	Title  string
+	IsPage bool
+}
+
+func findArticles(fsys fs.FS) (articles []Article) {
+
 	fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
-		if d.Name() == "post.toml" {
-			paths = append(paths, filepath.Dir(path))
+		if d.IsDir() || !strings.HasSuffix(d.Name(), ".dj") {
+			return nil
 		}
+
+		fileContent, err := fs.ReadFile(fsys, path)
+		if err != nil {
+			panic(err)
+		}
+
+		parts := strings.SplitN(string(fileContent), "+++", 3)
+		if !(len(parts) == 3 && parts[0] == "") {
+			fmt.Printf("FIXME: Missing metadata in %s - Skipped.\n", path)
+			return nil
+		}
+		metaText := strings.TrimSpace(parts[1])
+		bodyText := strings.TrimSpace(parts[2])
+
+		var meta ArticleMetadata
+		_, err = toml.Decode(metaText, &meta)
+		if err != nil {
+			fmt.Printf("FIXME: Malformed article metadata in %s: %s", path, err)
+			return nil
+		}
+
+		article := Article{
+			Path:     path,
+			DjotBody: bodyText,
+			Meta:     meta,
+		}
+		articles = append(articles, article)
+		fmt.Printf("Found article %s - %s\n", article.Path, article.Meta.Title)
 		return nil
 	})
-	return posts
+	return articles
 }
