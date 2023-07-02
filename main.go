@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"io/fs"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/BurntSushi/toml"
+	"go.imnhan.com/webmaker2000/djot"
 )
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fsys := os.DirFS(absolutePath)
+	fsys := WriteDirFS(absolutePath)
 
 	meta := readSiteMetadata(fsys)
 	fmt.Println("Found site:", meta)
@@ -31,6 +31,7 @@ func main() {
 	fmt.Printf("Found %d articles:\n", len(articles))
 	for _, a := range articles {
 		fmt.Println(">", a.Path, "-", a.Meta.Title)
+		a.WriteHtmlFile()
 	}
 
 	println("Serving local website at http://localhost:" + port)
@@ -46,7 +47,7 @@ type SiteMetadata struct {
 	Tagline string
 }
 
-func readSiteMetadata(fsys fs.FS) (sm SiteMetadata) {
+func readSiteMetadata(fsys WritableFS) (sm SiteMetadata) {
 	_, err := toml.DecodeFS(fsys, "website.toml", &sm)
 	if err != nil {
 		panic(err)
@@ -54,10 +55,22 @@ func readSiteMetadata(fsys fs.FS) (sm SiteMetadata) {
 	return sm
 }
 
+const DJOT_EXT = ".dj"
+
 type Article struct {
+	Fs       WritableFS
 	Path     string
 	DjotBody string
 	Meta     ArticleMetadata
+}
+
+func (a *Article) WriteHtmlFile() {
+	html := djot.ToHtml(a.DjotBody)
+	path := strings.TrimSuffix(a.Path, DJOT_EXT) + ".html"
+	err := a.Fs.WriteFile(path, html)
+	if err != nil {
+		panic(err)
+	}
 }
 
 type ArticleMetadata struct {
@@ -65,10 +78,10 @@ type ArticleMetadata struct {
 	IsPage bool
 }
 
-func findArticles(fsys fs.FS) (articles []Article) {
+func findArticles(fsys WritableFS) (articles []Article) {
 
 	fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
-		if d.IsDir() || !strings.HasSuffix(d.Name(), ".dj") {
+		if d.IsDir() || !strings.HasSuffix(d.Name(), DJOT_EXT) {
 			return nil
 		}
 
@@ -93,6 +106,7 @@ func findArticles(fsys fs.FS) (articles []Article) {
 		}
 
 		article := Article{
+			Fs:       fsys,
 			Path:     path,
 			DjotBody: bodyText,
 			Meta:     meta,
