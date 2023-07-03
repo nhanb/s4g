@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
+	"html/template"
 	"io/fs"
 	"net/http"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/BurntSushi/toml"
 	"go.imnhan.com/webmaker2000/djot"
@@ -24,15 +27,17 @@ func main() {
 	}
 	fsys := WriteDirFS(absolutePath)
 
-	meta := readSiteMetadata(fsys)
-	fmt.Println("Found site:", meta)
+	site := readSiteMetadata(fsys)
+	fmt.Println("Found site:", site)
 
 	articles := findArticles(fsys)
 	fmt.Printf("Found %d articles:\n", len(articles))
 	for _, a := range articles {
 		fmt.Println(">", a.Path, "-", a.Meta.Title)
-		a.WriteHtmlFile()
+		a.WriteHtmlFile(&site)
 	}
+
+	WriteHomePage(fsys, site, articles)
 
 	println("Serving local website at http://localhost:" + port)
 	http.Handle("/", http.FileServer(http.FS(fsys)))
@@ -43,8 +48,9 @@ func main() {
 }
 
 type SiteMetadata struct {
-	Name    string
-	Tagline string
+	Name     string
+	Tagline  string
+	HomePath string
 }
 
 func readSiteMetadata(fsys WritableFS) (sm SiteMetadata) {
@@ -60,22 +66,78 @@ const DJOT_EXT = ".dj"
 type Article struct {
 	Fs       WritableFS
 	Path     string
+	WebPath  string
 	DjotBody string
 	Meta     ArticleMetadata
 }
 
-func (a *Article) WriteHtmlFile() {
-	html := djot.ToHtml(a.DjotBody)
-	path := strings.TrimSuffix(a.Path, DJOT_EXT) + ".html"
-	err := a.Fs.WriteFile(path, html)
+type ArticleMetadata struct {
+	Title     string
+	IsPage    bool
+	IsDraft   bool
+	CreatedAt time.Time
+}
+
+func (a *Article) WriteHtmlFile(site *SiteMetadata) {
+	// First generate the main content in html
+	contentHtml := djot.ToHtml(a.DjotBody)
+
+	// Then insert that content into the main template
+	var buf bytes.Buffer
+	tmpl := template.Must(
+		template.ParseFS(
+			a.Fs,
+			"_theme/base.tmpl",
+			"_theme/post.tmpl",
+		),
+	)
+	err := tmpl.Execute(&buf, struct {
+		Site    *SiteMetadata
+		Content template.HTML
+		Title   string
+		Post    *Article
+	}{
+		Site:    site,
+		Content: template.HTML(contentHtml),
+		Title:   a.Meta.Title,
+		Post:    a,
+	})
+	if err != nil {
+		fmt.Println("Error in WriteHtmlFile:", err)
+		return
+	}
+	fullHtml := buf.String()
+
+	// Now write into an html with the same name as the original djot file
+	err = a.Fs.WriteFile(a.WebPath, fullHtml)
 	if err != nil {
 		panic(err)
 	}
 }
 
-type ArticleMetadata struct {
-	Title  string
-	IsPage bool
+func WriteHomePage(fsys WritableFS, site SiteMetadata, articles []Article) {
+	var buf bytes.Buffer
+	tmpl := template.Must(
+		template.ParseFS(
+			fsys,
+			"_theme/base.tmpl",
+			"_theme/home.tmpl",
+		),
+	)
+	err := tmpl.Execute(&buf, struct {
+		Site  *SiteMetadata
+		Title string
+		Posts []Article
+	}{
+		Site:  &site,
+		Title: fmt.Sprintf("%s - %s", site.Name, site.Tagline),
+		Posts: articles,
+	})
+	if err != nil {
+		fmt.Println("Error in WriteHtmlFile:", err)
+		return
+	}
+	fsys.WriteFile("index.html", buf.String())
 }
 
 func findArticles(fsys WritableFS) (articles []Article) {
@@ -108,11 +170,11 @@ func findArticles(fsys WritableFS) (articles []Article) {
 		article := Article{
 			Fs:       fsys,
 			Path:     path,
+			WebPath:  strings.TrimSuffix(path, DJOT_EXT) + ".html",
 			DjotBody: bodyText,
 			Meta:     meta,
 		}
 		articles = append(articles, article)
-		fmt.Printf("Found article %s - %s\n", article.Path, article.Meta.Title)
 		return nil
 	})
 	return articles

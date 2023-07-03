@@ -2,11 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>About - My Site</title>
+    <title>{{if .Title}}{{.Title}} - {{.Site.Name}}{{else}}{{.Site.Name}}{{end}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <style>
-       
+      /* Global look and feel */
       * {
         box-sizing: border-box;
       }
@@ -67,46 +67,12 @@
   <body>
 
   <header>
-    <h1><a href="/">My Site</a></h1>
-    <p class="tagline">And it&#39;s fine.</p>
+    <h1><a href="{{.Site.HomePath}}">{{.Site.Name}}</a></h1>
+    <p class="tagline">{{.Site.Tagline}}</p>
   </header>
 
   <main>
-  
-<h1 class="post-title">About</h1>
-<time class="post-time" datetime="0001-01-01">
-    Monday, 01 Jan 0001
-</time>
-<content>
-<section id="About-this-site">
-<h2>About this site</h2>
-<p>It’s a website.</p>
-</section>
-<section id="No-really">
-<h2>No really</h2>
-<p>It really <em>is</em> a full-blown
-<a href="https://motherfuckingwebsite.com/">mf-ing website</a>.</p>
-</section>
-
-</content>
-
-<style>
-.post-title {
-    text-align: center;
-    font-size: 2rem;
-    margin-bottom: 0;
-}
-.post-time {
-    display: block;
-    text-align: center;
-}
-
-content img,
-content video {
-    max-width: 100%;
-}
-</style>
-
+  {{template "body" .}}
   </main>
 
   </body>

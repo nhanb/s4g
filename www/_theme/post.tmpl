@@ -1,0 +1,26 @@
+{{define "body"}}
+<h1 class="post-title">{{.Post.Meta.Title}}</h1>
+<time class="post-time" datetime="{{.Post.Meta.CreatedAt.Local.Format "2006-01-02"}}">
+    {{.Post.Meta.CreatedAt.Local.Format "Monday, 02 Jan 2006"}}
+</time>
+<content>
+{{.Content}}
+</content>
+
+<style>
+.post-title {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 0;
+}
+.post-time {
+    display: block;
+    text-align: center;
+}
+
+content img,
+content video {
+    max-width: 100%;
+}
+</style>
+{{end}}

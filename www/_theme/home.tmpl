@@ -1,0 +1,26 @@
+{{define "body"}}
+<p>All posts, newest first:</p>
+
+<ul>
+    {{range .Posts}}
+    {{if not .Meta.IsDraft}}
+    <li>
+      {{.Meta.CreatedAt.Local.Format "2006-01-02"}}
+      — <a href="{{.WebPath}}">{{.Meta.Title}}</a>
+    </li>
+    {{end}}
+    {{end}}
+</ul>
+
+<style>
+    ul a {
+        text-decoration: none;
+    }
+
+    ul {
+        padding: 0;
+        list-style-type: none;
+        font-size: 1.1rem;
+    }
+</style>
+{{end}}
