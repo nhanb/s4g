@@ -1,26 +1,32 @@
 {{define "body"}}
+<nav>
+  <a href="{{.Site.HomePath}}">Home</a>
+  {{range .Pages}}<a href="{{$.Site.HomePath}}{{.WebPath}}">{{.Meta.Title}}</a>{{end}}
+{{if not .Post.Meta.PostedAt.IsZero}}
+  <span class="posted-on">
+    Posted on
+    <time datetime="{{.Post.Meta.PostedAt.Local.Format "2006-01-02"}}">
+        {{.Post.Meta.PostedAt.Local.Format "Monday, 02 Jan 2006"}}
+    </time>
+  </span>
+{{end}}
+</nav>
+
+<hr>
+
 <h1 class="post-title">{{.Post.Meta.Title}}</h1>
-<time class="post-time" datetime="{{.Post.Meta.CreatedAt.Local.Format "2006-01-02"}}">
-    {{.Post.Meta.CreatedAt.Local.Format "Monday, 02 Jan 2006"}}
-</time>
 <content>
 {{.Content}}
 </content>
 
 <style>
-.post-title {
-    text-align: center;
-    font-size: 2rem;
-    margin-bottom: 0;
+nav > a {
+  margin-right: 0.5rem;
 }
-.post-time {
-    display: block;
-    text-align: center;
-}
-
-content img,
-content video {
-    max-width: 100%;
+.posted-on {
+  float: right;
+  font-style: italic;
 }
 </style>
+
 {{end}}

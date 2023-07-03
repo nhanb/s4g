@@ -1,11 +1,29 @@
 {{define "body"}}
+<header>
+  <h1 class="site-title">{{.Site.Name}}</h1>
+  <p class="tagline">{{.Site.Tagline}}</p>
+</header>
+
+<hr>
+
+{{if .Pages}}
+  <div class="pages">
+    <a href="{{$.Site.HomePath}}">Home</a>
+    {{range .Pages}}
+    <a href="{{.WebPath}}">{{.Meta.Title}}</a>
+    {{end}}
+  </div>
+
+  <hr>
+{{end}}
+
 <p>All posts, newest first:</p>
 
 <ul>
     {{range .Posts}}
     {{if not .Meta.IsDraft}}
     <li>
-      {{.Meta.CreatedAt.Local.Format "2006-01-02"}}
+      {{.Meta.PostedAt.Local.Format "2006-01-02"}}
       — <a href="{{.WebPath}}">{{.Meta.Title}}</a>
     </li>
     {{end}}
@@ -13,14 +31,21 @@
 </ul>
 
 <style>
-    ul a {
-        text-decoration: none;
-    }
+.site-title {
+  margin-bottom: 0;
+}
+.tagline {
+  margin-top: 0;
+}
 
-    ul {
-        padding: 0;
-        list-style-type: none;
-        font-size: 1.1rem;
-    }
+.pages a {
+  margin-right: 0.5rem;
+}
+
+ul {
+  padding: 0;
+  list-style-type: none;
+  /*font-size: 1.1rem;*/
+}
 </style>
 {{end}}

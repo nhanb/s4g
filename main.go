@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"net/http"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -25,19 +26,28 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	fsys := WriteDirFS(absolutePath)
-
 	site := readSiteMetadata(fsys)
-	fmt.Println("Found site:", site)
 
-	articles := findArticles(fsys)
-	fmt.Printf("Found %d articles:\n", len(articles))
-	for _, a := range articles {
+	posts, pages := findArticles(fsys)
+
+	// Sort posts, newest first
+	sort.Slice(posts, func(i int, j int) bool {
+		return posts[i].Meta.PostedAt.Compare(posts[j].Meta.PostedAt) > 0
+	})
+
+	fmt.Printf("Found %d posts, %d pages:\n", len(posts), len(pages))
+	for _, a := range posts {
 		fmt.Println(">", a.Path, "-", a.Meta.Title)
-		a.WriteHtmlFile(&site)
+		a.WriteHtmlFile(&site, pages)
+	}
+	for _, a := range pages {
+		fmt.Println(">", a.Path, "-", a.Meta.Title)
+		a.WriteHtmlFile(&site, pages)
 	}
 
-	WriteHomePage(fsys, site, articles)
+	WriteHomePage(fsys, site, posts, pages)
 
 	println("Serving local website at http://localhost:" + port)
 	http.Handle("/", http.FileServer(http.FS(fsys)))
@@ -72,13 +82,13 @@ type Article struct {
 }
 
 type ArticleMetadata struct {
-	Title     string
-	IsPage    bool
-	IsDraft   bool
-	CreatedAt time.Time
+	Title    string
+	IsPage   bool
+	IsDraft  bool
+	PostedAt time.Time
 }
 
-func (a *Article) WriteHtmlFile(site *SiteMetadata) {
+func (a *Article) WriteHtmlFile(site *SiteMetadata, pages []Article) {
 	// First generate the main content in html
 	contentHtml := djot.ToHtml(a.DjotBody)
 
@@ -96,11 +106,13 @@ func (a *Article) WriteHtmlFile(site *SiteMetadata) {
 		Content template.HTML
 		Title   string
 		Post    *Article
+		Pages   []Article
 	}{
 		Site:    site,
 		Content: template.HTML(contentHtml),
-		Title:   a.Meta.Title,
+		Title:   fmt.Sprintf("%s | %s", a.Meta.Title, site.Name),
 		Post:    a,
+		Pages:   pages,
 	})
 	if err != nil {
 		fmt.Println("Error in WriteHtmlFile:", err)
@@ -115,7 +127,7 @@ func (a *Article) WriteHtmlFile(site *SiteMetadata) {
 	}
 }
 
-func WriteHomePage(fsys WritableFS, site SiteMetadata, articles []Article) {
+func WriteHomePage(fsys WritableFS, site SiteMetadata, posts, pages []Article) {
 	var buf bytes.Buffer
 	tmpl := template.Must(
 		template.ParseFS(
@@ -128,10 +140,12 @@ func WriteHomePage(fsys WritableFS, site SiteMetadata, articles []Article) {
 		Site  *SiteMetadata
 		Title string
 		Posts []Article
+		Pages []Article
 	}{
 		Site:  &site,
 		Title: fmt.Sprintf("%s - %s", site.Name, site.Tagline),
-		Posts: articles,
+		Posts: posts,
+		Pages: pages,
 	})
 	if err != nil {
 		fmt.Println("Error in WriteHtmlFile:", err)
@@ -140,7 +154,7 @@ func WriteHomePage(fsys WritableFS, site SiteMetadata, articles []Article) {
 	fsys.WriteFile("index.html", buf.String())
 }
 
-func findArticles(fsys WritableFS) (articles []Article) {
+func findArticles(fsys WritableFS) (posts, pages []Article) {
 
 	fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() || !strings.HasSuffix(d.Name(), DJOT_EXT) {
@@ -174,8 +188,12 @@ func findArticles(fsys WritableFS) (articles []Article) {
 			DjotBody: bodyText,
 			Meta:     meta,
 		}
-		articles = append(articles, article)
+		if article.Meta.IsPage {
+			pages = append(pages, article)
+		} else {
+			posts = append(posts, article)
+		}
 		return nil
 	})
-	return articles
+	return
 }
