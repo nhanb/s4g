@@ -5,6 +5,7 @@
   <meta charset="utf-8" />
   <title>{{.Title}}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="alternate" type="application/atom+xml" title="Atom feed" href="{{.Feed}}">
   <style>
     html {
       font-family: serif;
@@ -12,9 +13,6 @@
       margin: auto;
     }
   </style>
-{{if .Feed}}
-  <link rel="alternate" type="application/atom+xml" title="Atom feed" href="{{.Feed}}">
-{{end}}
 </head>
 
 <body>

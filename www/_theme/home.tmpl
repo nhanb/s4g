@@ -6,16 +6,17 @@
 
 <hr>
 
-{{if .Pages}}
-  <div class="pages">
-    <a href="{{$.Site.HomePath}}">Home</a>
-    {{range .Pages}}
-    <a href="{{.WebPath}}">{{.Meta.Title}}</a>
-    {{end}}
-  </div>
-
-  <hr>
+<div class="pages">
+  <a href="{{.Site.HomePath}}">Home</a>
+{{range .Pages}}
+  <a href="{{.WebPath}}">{{.Meta.Title}}</a>
 {{end}}
+  <a class="feed-link" href="{{.Feed}}">
+    <img src="{{.Site.HomePath}}_theme/feed.svg" alt="Atom Feed" title="Atom Feed">
+  </a>
+</div>
+
+<hr>
 
 <p>All posts, newest first:</p>
 
@@ -36,6 +37,16 @@
 }
 .tagline {
   margin-top: 0;
+}
+
+.feed-link img {
+  height: 1rem;
+}
+.feed-link {
+  float: right;
+}
+hr {
+  clear: both;
 }
 
 .pages a {
