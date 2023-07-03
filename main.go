@@ -16,6 +16,9 @@ import (
 	"go.imnhan.com/webmaker2000/djot"
 )
 
+const DJOT_EXT = ".dj"
+const FEED_PATH = "feed.xml"
+
 func main() {
 	var port, folder string
 	flag.StringVar(&port, "port", "3338", "Port for local preview server")
@@ -49,6 +52,8 @@ func main() {
 
 	WriteHomePage(fsys, site, posts, pages)
 
+	fsys.WriteFile(FEED_PATH, generateFeed(site, posts, site.HomePath+FEED_PATH))
+
 	println("Serving local website at http://localhost:" + port)
 	http.Handle("/", http.FileServer(http.FS(fsys)))
 	err = http.ListenAndServe("127.0.0.1:"+port, nil)
@@ -58,9 +63,15 @@ func main() {
 }
 
 type SiteMetadata struct {
+	Address  string
 	Name     string
 	Tagline  string
 	HomePath string
+	Author   struct {
+		Name  string
+		URI   string
+		Email string
+	}
 }
 
 func readSiteMetadata(fsys WritableFS) (sm SiteMetadata) {
@@ -68,10 +79,11 @@ func readSiteMetadata(fsys WritableFS) (sm SiteMetadata) {
 	if err != nil {
 		panic(err)
 	}
+	if sm.HomePath == "" {
+		sm.HomePath = "/"
+	}
 	return sm
 }
-
-const DJOT_EXT = ".dj"
 
 type Article struct {
 	Fs       WritableFS
@@ -107,18 +119,20 @@ func (a *Article) WriteHtmlFile(site *SiteMetadata, pages []Article) {
 		Title   string
 		Post    *Article
 		Pages   []Article
+		Feed    string
 	}{
 		Site:    site,
 		Content: template.HTML(contentHtml),
 		Title:   fmt.Sprintf("%s | %s", a.Meta.Title, site.Name),
 		Post:    a,
 		Pages:   pages,
+		Feed:    site.HomePath + FEED_PATH,
 	})
 	if err != nil {
 		fmt.Println("Error in WriteHtmlFile:", err)
 		return
 	}
-	fullHtml := buf.String()
+	fullHtml := buf.Bytes()
 
 	// Now write into an html with the same name as the original djot file
 	err = a.Fs.WriteFile(a.WebPath, fullHtml)
@@ -141,17 +155,19 @@ func WriteHomePage(fsys WritableFS, site SiteMetadata, posts, pages []Article) {
 		Title string
 		Posts []Article
 		Pages []Article
+		Feed  string
 	}{
 		Site:  &site,
 		Title: fmt.Sprintf("%s - %s", site.Name, site.Tagline),
 		Posts: posts,
 		Pages: pages,
+		Feed:  site.HomePath + FEED_PATH,
 	})
 	if err != nil {
 		fmt.Println("Error in WriteHtmlFile:", err)
 		return
 	}
-	fsys.WriteFile("index.html", buf.String())
+	fsys.WriteFile("index.html", buf.Bytes())
 }
 
 func findArticles(fsys WritableFS) (posts, pages []Article) {

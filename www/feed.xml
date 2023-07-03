@@ -1,0 +1,25 @@
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>CoolZone</title>
+  <id>https://coolzone.example.com/</id>
+  <link rel="self" href="/feed.xml"></link>
+  <updated>2023-04-05T00:00:00+07:00</updated>
+  <author>
+    <name>Coolio McCool</name>
+    <uri>https://author.example.com</uri>
+    <email>coolio@example.com</email>
+  </author>
+  <entry>
+    <title>This is a motherfucking website.</title>
+    <id>https://coolzone.example.com/mfws.html</id>
+    <link href="https://coolzone.example.com/mfws.html"></link>
+    <published>2023-04-05T00:00:00+07:00</published>
+    <updated>2023-04-05T00:00:00+07:00</updated>
+  </entry>
+  <entry>
+    <title>Hello</title>
+    <id>https://coolzone.example.com/hello/index.html</id>
+    <link href="https://coolzone.example.com/hello/index.html"></link>
+    <published>2022-01-02T00:00:00+07:00</published>
+    <updated>2022-01-02T00:00:00+07:00</updated>
+  </entry>
+</feed>

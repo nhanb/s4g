@@ -12,6 +12,9 @@
       margin: auto;
     }
   </style>
+{{if .Feed}}
+  <link rel="alternate" type="application/atom+xml" title="Atom feed" href="{{.Feed}}">
+{{end}}
 </head>
 
 <body>

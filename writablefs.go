@@ -8,7 +8,7 @@ import (
 
 type WritableFS interface {
 	fs.FS
-	WriteFile(path string, content string) error
+	WriteFile(path string, content []byte) error
 }
 
 // Like os.DirFS but is writable
@@ -22,7 +22,7 @@ func (w writeDirFS) Open(name string) (fs.File, error) {
 	return os.DirFS(string(w)).Open(name)
 }
 
-func (w writeDirFS) WriteFile(path string, content string) error {
+func (w writeDirFS) WriteFile(path string, content []byte) error {
 	fullPath := filepath.Join(string(w), path)
-	return os.WriteFile(fullPath, []byte(content), 0644)
+	return os.WriteFile(fullPath, content, 0644)
 }

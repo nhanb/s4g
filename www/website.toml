@@ -1,3 +1,9 @@
+Address = "https://coolzone.example.com"
 Name = "CoolZone"
 Tagline = "Cool people only."
 HomePath = "/"
+
+[Author]
+Name = "Coolio McCool"
+URI = "https://author.example.com"
+Email = "coolio@example.com"
