@@ -40,17 +40,19 @@ func main() {
 		return posts[i].Meta.PostedAt.Compare(posts[j].Meta.PostedAt) > 0
 	})
 
+	startYear := posts[len(posts)-1].Meta.PostedAt.Year()
+
 	fmt.Printf("Found %d posts, %d pages:\n", len(posts), len(pages))
 	for _, a := range posts {
 		fmt.Println(">", a.Path, "-", a.Meta.Title)
-		a.WriteHtmlFile(&site, pages)
+		a.WriteHtmlFile(&site, pages, startYear)
 	}
 	for _, a := range pages {
 		fmt.Println(">", a.Path, "-", a.Meta.Title)
-		a.WriteHtmlFile(&site, pages)
+		a.WriteHtmlFile(&site, pages, startYear)
 	}
 
-	WriteHomePage(fsys, site, posts, pages)
+	WriteHomePage(fsys, site, posts, pages, startYear)
 
 	fsys.WriteFile(FEED_PATH, generateFeed(site, posts, site.HomePath+FEED_PATH))
 
@@ -101,7 +103,7 @@ type ArticleMetadata struct {
 	PostedAt time.Time
 }
 
-func (a *Article) WriteHtmlFile(site *SiteMetadata, pages []Article) {
+func (a *Article) WriteHtmlFile(site *SiteMetadata, pages []Article, startYear int) {
 	// First generate the main content in html
 	contentHtml := djot.ToHtml(a.DjotBody)
 
@@ -115,21 +117,23 @@ func (a *Article) WriteHtmlFile(site *SiteMetadata, pages []Article) {
 		),
 	)
 	err := tmpl.Execute(&buf, struct {
-		Site    *SiteMetadata
-		Content template.HTML
-		Title   string
-		Post    *Article
-		Pages   []Article
-		Feed    string
-		Now     time.Time
+		Site      *SiteMetadata
+		Content   template.HTML
+		Title     string
+		Post      *Article
+		Pages     []Article
+		Feed      string
+		Now       time.Time
+		StartYear int
 	}{
-		Site:    site,
-		Content: template.HTML(contentHtml),
-		Title:   fmt.Sprintf("%s | %s", a.Meta.Title, site.Name),
-		Post:    a,
-		Pages:   pages,
-		Feed:    site.HomePath + FEED_PATH,
-		Now:     time.Now(),
+		Site:      site,
+		Content:   template.HTML(contentHtml),
+		Title:     fmt.Sprintf("%s | %s", a.Meta.Title, site.Name),
+		Post:      a,
+		Pages:     pages,
+		Feed:      site.HomePath + FEED_PATH,
+		Now:       time.Now(),
+		StartYear: startYear,
 	})
 	if err != nil {
 		fmt.Println("Error in WriteHtmlFile:", err)
@@ -144,7 +148,12 @@ func (a *Article) WriteHtmlFile(site *SiteMetadata, pages []Article) {
 	}
 }
 
-func WriteHomePage(fsys WritableFS, site SiteMetadata, posts, pages []Article) {
+func WriteHomePage(
+	fsys WritableFS,
+	site SiteMetadata,
+	posts, pages []Article,
+	startYear int,
+) {
 	var buf bytes.Buffer
 	tmpl := template.Must(
 		template.ParseFS(
@@ -154,19 +163,21 @@ func WriteHomePage(fsys WritableFS, site SiteMetadata, posts, pages []Article) {
 		),
 	)
 	err := tmpl.Execute(&buf, struct {
-		Site  *SiteMetadata
-		Title string
-		Posts []Article
-		Pages []Article
-		Feed  string
-		Now   time.Time
+		Site      *SiteMetadata
+		Title     string
+		Posts     []Article
+		Pages     []Article
+		Feed      string
+		Now       time.Time
+		StartYear int
 	}{
-		Site:  &site,
-		Title: fmt.Sprintf("%s - %s", site.Name, site.Tagline),
-		Posts: posts,
-		Pages: pages,
-		Feed:  site.HomePath + FEED_PATH,
-		Now:   time.Now(),
+		Site:      &site,
+		Title:     fmt.Sprintf("%s - %s", site.Name, site.Tagline),
+		Posts:     posts,
+		Pages:     pages,
+		Feed:      site.HomePath + FEED_PATH,
+		Now:       time.Now(),
+		StartYear: startYear,
 	})
 	if err != nil {
 		fmt.Println("Error in WriteHtmlFile:", err)

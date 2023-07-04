@@ -20,8 +20,8 @@
 
 {{if not .Site.DisableFooter}}
 <footer>
-Copyright {{.Now.Year}} {{.Site.Author.Name}}. All rights reserved.<br>
-Made with <a href="https://github.com/nhanb/webmaker2000">WebMaker2000</a>.
+© {{if eq .StartYear .Now.Year}}{{.StartYear}}{{else}}{{.StartYear}}–{{.Now.Year}}{{end}} {{.Site.Author.Name}}<br>
+Made with <a href="https://github.com/nhanb/webmaker2000">WebMaker2000</a>
 </footer>
 <style>
 footer {
