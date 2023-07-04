@@ -63,11 +63,12 @@ func main() {
 }
 
 type SiteMetadata struct {
-	Address  string
-	Name     string
-	Tagline  string
-	HomePath string
-	Author   struct {
+	Address       string
+	Name          string
+	Tagline       string
+	HomePath      string
+	DisableFooter bool
+	Author        struct {
 		Name  string
 		URI   string
 		Email string
@@ -120,6 +121,7 @@ func (a *Article) WriteHtmlFile(site *SiteMetadata, pages []Article) {
 		Post    *Article
 		Pages   []Article
 		Feed    string
+		Now     time.Time
 	}{
 		Site:    site,
 		Content: template.HTML(contentHtml),
@@ -127,6 +129,7 @@ func (a *Article) WriteHtmlFile(site *SiteMetadata, pages []Article) {
 		Post:    a,
 		Pages:   pages,
 		Feed:    site.HomePath + FEED_PATH,
+		Now:     time.Now(),
 	})
 	if err != nil {
 		fmt.Println("Error in WriteHtmlFile:", err)
@@ -156,12 +159,14 @@ func WriteHomePage(fsys WritableFS, site SiteMetadata, posts, pages []Article) {
 		Posts []Article
 		Pages []Article
 		Feed  string
+		Now   time.Time
 	}{
 		Site:  &site,
 		Title: fmt.Sprintf("%s - %s", site.Name, site.Tagline),
 		Posts: posts,
 		Pages: pages,
 		Feed:  site.HomePath + FEED_PATH,
+		Now:   time.Now(),
 	})
 	if err != nil {
 		fmt.Println("Error in WriteHtmlFile:", err)

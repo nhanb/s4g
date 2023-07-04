@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
   <meta charset="utf-8" />
@@ -17,6 +17,21 @@
 
 <body>
 {{template "body" .}}
+
+{{if not .Site.DisableFooter}}
+<footer>
+Copyright {{.Now.Year}} {{.Site.Author.Name}}. All rights reserved.<br>
+Made with <a href="https://github.com/nhanb/webmaker2000">WebMaker2000</a>.
+</footer>
+<style>
+footer {
+  margin-top: 2rem;
+  text-align: right;
+  font-size: 0.8rem;
+}
+</style>
+{{end}}
+
 </body>
 
 </html>
