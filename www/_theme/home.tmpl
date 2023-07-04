@@ -8,9 +8,9 @@
 
 <div class="pages">
   <a href="{{.Site.HomePath}}">Home</a>
-{{range .Pages}}
+{{- range .Pages}}
   <a href="{{.WebPath}}">{{.Meta.Title}}</a>
-{{end}}
+{{- end}}
   <a class="feed-link" href="{{.Feed}}">
     <img src="{{.Site.HomePath}}_theme/feed.svg" alt="Atom Feed" title="Atom Feed">
   </a>
@@ -21,14 +21,14 @@
 <p>All posts, newest first:</p>
 
 <ul>
-    {{range .Posts}}
-    {{if not .Meta.IsDraft}}
-    <li>
-      {{.Meta.PostedAt.Local.Format "2006-01-02"}}
-      — <a href="{{.WebPath}}">{{.Meta.Title}}</a>
-    </li>
-    {{end}}
-    {{end}}
+  {{- range .Posts}}
+  {{- if not .Meta.IsDraft}}
+  <li>
+    {{.Meta.PostedAt.Local.Format "2006-01-02"}} —
+    <a href="{{.WebPath}}">{{.Meta.Title}}</a>
+  </li>
+  {{- end}}
+  {{- end}}
 </ul>
 
 <style>

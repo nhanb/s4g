@@ -1,15 +1,19 @@
 {{define "body"}}
 <nav>
   <a href="{{.Site.HomePath}}">Home</a>
-  {{range .Pages}}<a href="{{$.Site.HomePath}}{{.WebPath}}">{{.Meta.Title}}</a>{{end}}
-{{if not .Post.Meta.PostedAt.IsZero}}
+  {{- range .Pages}}
+  <a href="{{$.Site.HomePath}}{{.WebPath}}">{{.Meta.Title}}</a>
+  {{- end}}
+
+  {{- if not .Post.Meta.PostedAt.IsZero}}
   <span class="posted-on">
     Posted on
     <time datetime="{{.Post.Meta.PostedAt.Local.Format "2006-01-02"}}">
         {{.Post.Meta.PostedAt.Local.Format "Monday, 02 Jan 2006"}}
     </time>
   </span>
-{{end}}
+  {{- end}}
+
 </nav>
 
 <hr>
@@ -28,5 +32,4 @@ nav > a {
   font-style: italic;
 }
 </style>
-
 {{end}}
