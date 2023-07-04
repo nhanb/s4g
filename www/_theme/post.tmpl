@@ -1,3 +1,7 @@
+{{- define "head"}}
+  <link rel="stylesheet" href="{{.Site.HomePath}}_theme/post.css">
+{{- end}}
+
 {{define "body"}}
 <nav>
   <a href="{{.Site.HomePath}}">Home</a>
@@ -23,13 +27,4 @@
 {{.Content}}
 </content>
 
-<style>
-nav > a {
-  margin-right: 0.5rem;
-}
-.posted-on {
-  float: right;
-  font-style: italic;
-}
-</style>
-{{end}}
+{{- end}}

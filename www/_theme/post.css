@@ -1,0 +1,8 @@
+nav > a {
+  margin-right: 0.5rem;
+}
+
+.posted-on {
+  float: right;
+  font-style: italic;
+}
