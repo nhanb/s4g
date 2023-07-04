@@ -1,0 +1,17 @@
+html {
+  font-family: serif;
+  max-width: 50rem;
+  margin: auto;
+}
+
+p,
+ul,
+ol {
+  line-height: 1.3rem;
+}
+
+footer {
+  margin-top: 2rem;
+  text-align: right;
+  font-size: 0.8rem;
+}
