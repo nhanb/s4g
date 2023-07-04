@@ -52,7 +52,9 @@ func main() {
 		a.WriteHtmlFile(&site, pages, startYear)
 	}
 
-	WriteHomePage(fsys, site, posts, pages, startYear)
+	if site.GenerateHome {
+		WriteHomePage(fsys, site, posts, pages, startYear)
+	}
 
 	fsys.WriteFile(FEED_PATH, generateFeed(site, posts, site.HomePath+FEED_PATH))
 
@@ -65,25 +67,28 @@ func main() {
 }
 
 type SiteMetadata struct {
-	Address       string
-	Name          string
-	Tagline       string
-	HomePath      string
-	DisableFooter bool
-	Author        struct {
+	Address      string
+	Name         string
+	Tagline      string
+	HomePath     string
+	ShowFooter   bool
+	GenerateHome bool
+	Author       struct {
 		Name  string
 		URI   string
 		Email string
 	}
 }
 
-func readSiteMetadata(fsys WritableFS) (sm SiteMetadata) {
+func readSiteMetadata(fsys WritableFS) SiteMetadata {
+	sm := SiteMetadata{
+		HomePath:     "/",
+		ShowFooter:   true,
+		GenerateHome: true,
+	}
 	_, err := toml.DecodeFS(fsys, "website.toml", &sm)
 	if err != nil {
 		panic(err)
-	}
-	if sm.HomePath == "" {
-		sm.HomePath = "/"
 	}
 	return sm
 }

@@ -1,8 +1,6 @@
 Address = "https://coolzone.example.com"
 Name = "CoolZone"
 Tagline = "Cool people only."
-HomePath = "/"
-DisableFooter = false
 
 [Author]
 Name = "Coolio McCool"
