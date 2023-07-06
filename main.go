@@ -18,6 +18,7 @@ import (
 
 const DJOT_EXT = ".dj"
 const FEED_PATH = "feed.xml"
+const SITE_FILENAME = "website.wbmkr2k"
 
 func main() {
 	var port, folder string
@@ -102,7 +103,7 @@ func readSiteMetadata(fsys WritableFS) SiteMetadata {
 		ShowFooter:   true,
 		GenerateHome: true,
 	}
-	_, err := toml.DecodeFS(fsys, "website.toml", &sm)
+	_, err := toml.DecodeFS(fsys, SITE_FILENAME, &sm)
 	if err != nil {
 		panic(err)
 	}

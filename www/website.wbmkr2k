@@ -1,3 +1,6 @@
+# vim: ft=toml
+# -*- mode: toml; -*-
+
 Address = "https://coolzone.example.com"
 Name = "CoolZone"
 Tagline = "Cool people only."
