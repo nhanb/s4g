@@ -5,7 +5,7 @@
 {{define "body"}}
 <nav>
   <a href="{{.Site.HomePath}}">Home</a>
-  {{- range .Pages}}
+  {{- range .ArticlesInNav}}
   <a href="{{$.Site.HomePath}}{{.WebPath}}">{{.Title}}</a>
   {{- end}}
 

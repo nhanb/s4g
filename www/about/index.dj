@@ -1,6 +1,7 @@
 +++
 Title = "About"
-IsPage = true
+ShowInFeed = false
+ShowInNav = true
 +++
 
 ## About this site

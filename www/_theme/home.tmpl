@@ -10,7 +10,7 @@
 
 <div class="pages">
   <a href="{{.Site.HomePath}}">Home</a>
-{{- range .Pages}}
+{{- range .ArticlesInNav}}
   <a href="{{.WebPath}}">{{.Title}}</a>
 {{- end}}
   <a class="feed-link" href="{{.Feed}}">
@@ -23,7 +23,7 @@
 <p>All posts, newest first:</p>
 
 <ul>
-  {{- range .Posts}}
+  {{- range .ArticlesInFeed}}
   {{- if not .IsDraft}}
   <li>
     {{.PostedAt.Local.Format "2006-01-02"}} —

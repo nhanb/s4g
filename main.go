@@ -33,30 +33,46 @@ func main() {
 	fsys := WriteDirFS(absolutePath)
 	site := readSiteMetadata(fsys)
 
-	posts, pages := findArticles(fsys)
+	articles := findArticles(fsys)
 
-	// Sort posts, newest first
-	sort.Slice(posts, func(i int, j int) bool {
-		return posts[i].PostedAt.Compare(posts[j].PostedAt) > 0
+	// Sort articles, newest first
+	sort.Slice(articles, func(i int, j int) bool {
+		return articles[i].PostedAt.Compare(articles[j].PostedAt) > 0
 	})
 
-	startYear := posts[len(posts)-1].PostedAt.Year()
+	var startYear int
 
-	fmt.Printf("Found %d posts, %d pages:\n", len(posts), len(pages))
-	for _, a := range posts {
-		fmt.Println(">", a.Path, "-", a.Title)
-		a.WriteHtmlFile(&site, pages, startYear)
+	var articlesInNav, articlesInFeed []Article
+	for _, a := range articles {
+		if a.ShowInNav {
+			articlesInNav = append(articlesInNav, a)
+		}
+		if a.ShowInFeed {
+			articlesInFeed = append(articlesInFeed, a)
+		}
+		if !a.PostedAt.IsZero() {
+			startYear = a.PostedAt.Year()
+		}
 	}
-	for _, a := range pages {
+
+	if startYear == 0 {
+		startYear = time.Now().Year()
+	}
+
+	fmt.Printf("Found %d articles:\n", len(articles))
+	for _, a := range articles {
 		fmt.Println(">", a.Path, "-", a.Title)
-		a.WriteHtmlFile(&site, pages, startYear)
+		a.WriteHtmlFile(&site, articlesInNav, startYear)
 	}
 
 	if site.GenerateHome {
-		WriteHomePage(fsys, site, posts, pages, startYear)
+		WriteHomePage(fsys, site, articlesInFeed, articlesInNav, startYear)
 	}
 
-	fsys.WriteFile(FEED_PATH, generateFeed(site, posts, site.HomePath+FEED_PATH))
+	fsys.WriteFile(
+		FEED_PATH,
+		generateFeed(site, articlesInFeed, site.HomePath+FEED_PATH),
+	)
 
 	println("Serving local website at http://localhost:" + port)
 	http.Handle("/", http.FileServer(http.FS(fsys)))
@@ -102,14 +118,19 @@ type Article struct {
 }
 
 type ArticleMetadata struct {
-	Title     string
-	IsPage    bool
-	IsDraft   bool
-	PostedAt  time.Time
-	Templates []string
+	Title      string
+	IsDraft    bool
+	PostedAt   time.Time
+	Templates  []string
+	ShowInFeed bool
+	ShowInNav  bool
 }
 
-func (a *Article) WriteHtmlFile(site *SiteMetadata, pages []Article, startYear int) {
+func (a *Article) WriteHtmlFile(
+	site *SiteMetadata,
+	articlesInNav []Article,
+	startYear int,
+) {
 	// First generate the main content in html
 	contentHtml := djot.ToHtml(a.DjotBody)
 
@@ -118,23 +139,23 @@ func (a *Article) WriteHtmlFile(site *SiteMetadata, pages []Article, startYear i
 	// TODO: should probably reuse the template object for common cases
 	tmpl := template.Must(template.ParseFS(a.Fs, a.Templates...))
 	err := tmpl.Execute(&buf, struct {
-		Site      *SiteMetadata
-		Content   template.HTML
-		Title     string
-		Post      *Article
-		Pages     []Article
-		Feed      string
-		Now       time.Time
-		StartYear int
+		Site          *SiteMetadata
+		Content       template.HTML
+		Title         string
+		Post          *Article
+		ArticlesInNav []Article
+		Feed          string
+		Now           time.Time
+		StartYear     int
 	}{
-		Site:      site,
-		Content:   template.HTML(contentHtml),
-		Title:     fmt.Sprintf("%s | %s", a.Title, site.Name),
-		Post:      a,
-		Pages:     pages,
-		Feed:      site.HomePath + FEED_PATH,
-		Now:       time.Now(),
-		StartYear: startYear,
+		Site:          site,
+		Content:       template.HTML(contentHtml),
+		Title:         fmt.Sprintf("%s | %s", a.Title, site.Name),
+		Post:          a,
+		ArticlesInNav: articlesInNav,
+		Feed:          site.HomePath + FEED_PATH,
+		Now:           time.Now(),
+		StartYear:     startYear,
 	})
 	if err != nil {
 		fmt.Println("Error in WriteHtmlFile:", err)
@@ -152,7 +173,7 @@ func (a *Article) WriteHtmlFile(site *SiteMetadata, pages []Article, startYear i
 func WriteHomePage(
 	fsys WritableFS,
 	site SiteMetadata,
-	posts, pages []Article,
+	articlesInFeed, articlesInNav []Article,
 	startYear int,
 ) {
 	var buf bytes.Buffer
@@ -164,21 +185,21 @@ func WriteHomePage(
 		),
 	)
 	err := tmpl.Execute(&buf, struct {
-		Site      *SiteMetadata
-		Title     string
-		Posts     []Article
-		Pages     []Article
-		Feed      string
-		Now       time.Time
-		StartYear int
+		Site           *SiteMetadata
+		Title          string
+		ArticlesInFeed []Article
+		ArticlesInNav  []Article
+		Feed           string
+		Now            time.Time
+		StartYear      int
 	}{
-		Site:      &site,
-		Title:     fmt.Sprintf("%s - %s", site.Name, site.Tagline),
-		Posts:     posts,
-		Pages:     pages,
-		Feed:      site.HomePath + FEED_PATH,
-		Now:       time.Now(),
-		StartYear: startYear,
+		Site:           &site,
+		Title:          fmt.Sprintf("%s - %s", site.Name, site.Tagline),
+		ArticlesInFeed: articlesInFeed,
+		ArticlesInNav:  articlesInNav,
+		Feed:           site.HomePath + FEED_PATH,
+		Now:            time.Now(),
+		StartYear:      startYear,
 	})
 	if err != nil {
 		fmt.Println("Error in WriteHtmlFile:", err)
@@ -187,7 +208,7 @@ func WriteHomePage(
 	fsys.WriteFile("index.html", buf.Bytes())
 }
 
-func findArticles(fsys WritableFS) (posts, pages []Article) {
+func findArticles(fsys WritableFS) (result []Article) {
 
 	fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() || !strings.HasSuffix(d.Name(), DJOT_EXT) {
@@ -208,7 +229,9 @@ func findArticles(fsys WritableFS) (posts, pages []Article) {
 		bodyText := strings.TrimSpace(parts[2])
 
 		meta := ArticleMetadata{
-			Templates: []string{"_theme/base.tmpl", "_theme/post.tmpl"},
+			Templates:  []string{"_theme/base.tmpl", "_theme/post.tmpl"},
+			ShowInFeed: true,
+			ShowInNav:  false,
 		}
 		_, err = toml.Decode(metaText, &meta)
 		if err != nil {
@@ -223,11 +246,7 @@ func findArticles(fsys WritableFS) (posts, pages []Article) {
 			DjotBody:        bodyText,
 			ArticleMetadata: meta,
 		}
-		if article.IsPage {
-			pages = append(pages, article)
-		} else {
-			posts = append(posts, article)
-		}
+		result = append(result, article)
 		return nil
 	})
 	return
