@@ -8,7 +8,7 @@ import (
 )
 
 // TODO: Use Article's updated date instead of PostedAt.
-// I need to implement Article.Meta.UpdatedAt first though.
+// I need to implement Article.UpdatedAt first though.
 func generateFeed(site SiteMetadata, posts []Article, path string) []byte {
 	siteAddr := site.Address
 	if !strings.HasSuffix(siteAddr, "/") {
@@ -19,16 +19,16 @@ func generateFeed(site SiteMetadata, posts []Article, path string) []byte {
 		entries = append(entries, &atom.Entry{
 			ID:        siteAddr + p.WebPath,
 			Link:      []atom.Link{{Href: siteAddr + p.WebPath}},
-			Title:     p.Meta.Title,
-			Published: atom.Time(p.Meta.PostedAt),
-			Updated:   atom.Time(p.Meta.PostedAt),
+			Title:     p.Title,
+			Published: atom.Time(p.PostedAt),
+			Updated:   atom.Time(p.PostedAt),
 		})
 	}
 
 	feed := atom.Feed{
 		ID:      siteAddr,
 		Title:   site.Name,
-		Updated: atom.Time(posts[0].Meta.PostedAt),
+		Updated: atom.Time(posts[0].PostedAt),
 		Entry:   entries,
 		Author: &atom.Person{
 			Name:  site.Author.Name,

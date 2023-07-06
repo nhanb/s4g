@@ -37,18 +37,18 @@ func main() {
 
 	// Sort posts, newest first
 	sort.Slice(posts, func(i int, j int) bool {
-		return posts[i].Meta.PostedAt.Compare(posts[j].Meta.PostedAt) > 0
+		return posts[i].PostedAt.Compare(posts[j].PostedAt) > 0
 	})
 
-	startYear := posts[len(posts)-1].Meta.PostedAt.Year()
+	startYear := posts[len(posts)-1].PostedAt.Year()
 
 	fmt.Printf("Found %d posts, %d pages:\n", len(posts), len(pages))
 	for _, a := range posts {
-		fmt.Println(">", a.Path, "-", a.Meta.Title)
+		fmt.Println(">", a.Path, "-", a.Title)
 		a.WriteHtmlFile(&site, pages, startYear)
 	}
 	for _, a := range pages {
-		fmt.Println(">", a.Path, "-", a.Meta.Title)
+		fmt.Println(">", a.Path, "-", a.Title)
 		a.WriteHtmlFile(&site, pages, startYear)
 	}
 
@@ -98,14 +98,15 @@ type Article struct {
 	Path     string
 	WebPath  string
 	DjotBody string
-	Meta     ArticleMetadata
+	ArticleMetadata
 }
 
 type ArticleMetadata struct {
-	Title    string
-	IsPage   bool
-	IsDraft  bool
-	PostedAt time.Time
+	Title     string
+	IsPage    bool
+	IsDraft   bool
+	PostedAt  time.Time
+	Templates []string
 }
 
 func (a *Article) WriteHtmlFile(site *SiteMetadata, pages []Article, startYear int) {
@@ -114,13 +115,8 @@ func (a *Article) WriteHtmlFile(site *SiteMetadata, pages []Article, startYear i
 
 	// Then insert that content into the main template
 	var buf bytes.Buffer
-	tmpl := template.Must(
-		template.ParseFS(
-			a.Fs,
-			"_theme/base.tmpl",
-			"_theme/post.tmpl",
-		),
-	)
+	// TODO: should probably reuse the template object for common cases
+	tmpl := template.Must(template.ParseFS(a.Fs, a.Templates...))
 	err := tmpl.Execute(&buf, struct {
 		Site      *SiteMetadata
 		Content   template.HTML
@@ -133,7 +129,7 @@ func (a *Article) WriteHtmlFile(site *SiteMetadata, pages []Article, startYear i
 	}{
 		Site:      site,
 		Content:   template.HTML(contentHtml),
-		Title:     fmt.Sprintf("%s | %s", a.Meta.Title, site.Name),
+		Title:     fmt.Sprintf("%s | %s", a.Title, site.Name),
 		Post:      a,
 		Pages:     pages,
 		Feed:      site.HomePath + FEED_PATH,
@@ -211,7 +207,9 @@ func findArticles(fsys WritableFS) (posts, pages []Article) {
 		metaText := strings.TrimSpace(parts[1])
 		bodyText := strings.TrimSpace(parts[2])
 
-		var meta ArticleMetadata
+		meta := ArticleMetadata{
+			Templates: []string{"_theme/base.tmpl", "_theme/post.tmpl"},
+		}
 		_, err = toml.Decode(metaText, &meta)
 		if err != nil {
 			fmt.Printf("FIXME: Malformed article metadata in %s: %s", path, err)
@@ -219,13 +217,13 @@ func findArticles(fsys WritableFS) (posts, pages []Article) {
 		}
 
 		article := Article{
-			Fs:       fsys,
-			Path:     path,
-			WebPath:  strings.TrimSuffix(path, DJOT_EXT) + ".html",
-			DjotBody: bodyText,
-			Meta:     meta,
+			Fs:              fsys,
+			Path:            path,
+			WebPath:         strings.TrimSuffix(path, DJOT_EXT) + ".html",
+			DjotBody:        bodyText,
+			ArticleMetadata: meta,
 		}
-		if article.Meta.IsPage {
+		if article.IsPage {
 			pages = append(pages, article)
 		} else {
 			posts = append(posts, article)

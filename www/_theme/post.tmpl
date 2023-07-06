@@ -6,14 +6,14 @@
 <nav>
   <a href="{{.Site.HomePath}}">Home</a>
   {{- range .Pages}}
-  <a href="{{$.Site.HomePath}}{{.WebPath}}">{{.Meta.Title}}</a>
+  <a href="{{$.Site.HomePath}}{{.WebPath}}">{{.Title}}</a>
   {{- end}}
 
-  {{- if not .Post.Meta.PostedAt.IsZero}}
+  {{- if not .Post.PostedAt.IsZero}}
   <span class="posted-on">
     Posted on
-    <time datetime="{{.Post.Meta.PostedAt.Local.Format "2006-01-02"}}">
-        {{.Post.Meta.PostedAt.Local.Format "Monday, 02 Jan 2006"}}
+    <time datetime="{{.Post.PostedAt.Local.Format "2006-01-02"}}">
+        {{.Post.PostedAt.Local.Format "Monday, 02 Jan 2006"}}
     </time>
   </span>
   {{- end}}
@@ -22,7 +22,7 @@
 
 <hr>
 
-<h1 class="post-title">{{.Post.Meta.Title}}</h1>
+<h1 class="post-title">{{.Post.Title}}</h1>
 <content>
 {{.Content}}
 </content>

@@ -11,7 +11,7 @@
 <div class="pages">
   <a href="{{.Site.HomePath}}">Home</a>
 {{- range .Pages}}
-  <a href="{{.WebPath}}">{{.Meta.Title}}</a>
+  <a href="{{.WebPath}}">{{.Title}}</a>
 {{- end}}
   <a class="feed-link" href="{{.Feed}}">
     <img src="{{.Site.HomePath}}_theme/feed.svg" alt="Atom Feed" title="Atom Feed">
@@ -24,10 +24,10 @@
 
 <ul>
   {{- range .Posts}}
-  {{- if not .Meta.IsDraft}}
+  {{- if not .IsDraft}}
   <li>
-    {{.Meta.PostedAt.Local.Format "2006-01-02"}} —
-    <a href="{{.WebPath}}">{{.Meta.Title}}</a>
+    {{.PostedAt.Local.Format "2006-01-02"}} —
+    <a href="{{.WebPath}}">{{.Title}}</a>
   </li>
   {{- end}}
   {{- end}}
