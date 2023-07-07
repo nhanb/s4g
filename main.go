@@ -17,8 +17,9 @@ import (
 )
 
 const DJOT_EXT = ".dj"
+const SITE_EXT = ".wbmkr2k"
+const SITE_FILENAME = "website" + SITE_EXT
 const FEED_PATH = "feed.xml"
-const SITE_FILENAME = "website.wbmkr2k"
 
 func main() {
 	var port, folder string
@@ -32,8 +33,31 @@ func main() {
 	}
 
 	fsys := WriteDirFS(absolutePath)
-	site := readSiteMetadata(fsys)
 
+	regenerate(fsys)
+
+	// TODO: only rebuild necessary bits instead of regenerating
+	// the whole thing. To do that I'll probably need to:
+	// - Devise some sort of dependency graph
+	// - Filter out relevant FS events: this seems daunting considering the
+	// differences between OSes and applications (e.g. vim writes to temp file
+	// then renames)
+	closeWatcher := WatchLocalFS(fsys, func() {
+		fmt.Println("Change detected. Regenerating...")
+		regenerate(fsys)
+	})
+	defer closeWatcher()
+
+	println("Serving local website at http://localhost:" + port)
+	http.Handle("/", http.FileServer(http.FS(fsys)))
+	err = http.ListenAndServe("127.0.0.1:"+port, nil)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func regenerate(fsys WritableFS) {
+	site := readSiteMetadata(fsys)
 	articles := findArticles(fsys)
 
 	// Sort articles, newest first
@@ -74,13 +98,6 @@ func main() {
 		FEED_PATH,
 		generateFeed(site, articlesInFeed, site.HomePath+FEED_PATH),
 	)
-
-	println("Serving local website at http://localhost:" + port)
-	http.Handle("/", http.FileServer(http.FS(fsys)))
-	err = http.ListenAndServe("127.0.0.1:"+port, nil)
-	if err != nil {
-		panic(err)
-	}
 }
 
 type SiteMetadata struct {
@@ -236,7 +253,7 @@ func findArticles(fsys WritableFS) (result []Article) {
 		}
 		_, err = toml.Decode(metaText, &meta)
 		if err != nil {
-			fmt.Printf("FIXME: Malformed article metadata in %s: %s", path, err)
+			fmt.Printf("FIXME: Malformed article metadata in %s: %s\n", path, err)
 			return nil
 		}
 

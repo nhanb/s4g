@@ -2,7 +2,7 @@ build:
 	go build -o dist/
 
 watch:
-	find . -name '*.go' -or -name '*.js' -or -name '*.tmpl' -or -name '*.dj' \
+	find . -name '*.go' -or -name '*.js' \
 	| entr -rc go run .
 
 # Cheating a little because the djot.js repo on github does not provide builds
