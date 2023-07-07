@@ -57,6 +57,7 @@ func main() {
 }
 
 func regenerate(fsys WritableFS) {
+	defer timer("Took %s")()
 	site := readSiteMetadata(fsys)
 	articles := findArticles(fsys)
 
