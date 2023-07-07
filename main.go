@@ -85,20 +85,22 @@ func regenerate(fsys WritableFS) {
 		startYear = time.Now().Year()
 	}
 
-	fmt.Printf("Found %d articles:\n", len(articles))
 	for _, a := range articles {
 		fmt.Println(">", a.Path, "-", a.Title)
 		a.WriteHtmlFile(&site, articlesInNav, startYear)
 	}
+	fmt.Printf("Processed %d articles\n", len(articles))
 
 	if site.GenerateHome {
 		WriteHomePage(fsys, site, articlesInFeed, articlesInNav, startYear)
+		fmt.Println("Generated index.html")
 	}
 
 	fsys.WriteFile(
 		FEED_PATH,
 		generateFeed(site, articlesInFeed, site.HomePath+FEED_PATH),
 	)
+	fmt.Println("Generated", FEED_PATH)
 }
 
 type SiteMetadata struct {
