@@ -1,9 +1,12 @@
 <script>
+  const clientId =
+    Date.now().toString(36) + Math.random().toString(36).substr(2);
+
   setInterval(() => {
-    fetch("{{LR_ENDPOINT}}")
+    fetch("{{LR_ENDPOINT}}", { headers: { "{{CLIENT_ID_HEADER}}": clientId } })
       .then((resp) => resp.text())
       .then((text) => {
-        if (text === "{{SHOULD_RELOAD}}") {
+        if (text === "{{PLEASE_RELOAD}}") {
           location.reload();
         }
       });

@@ -12,6 +12,7 @@ import (
 )
 
 const endpoint = "/_livereload"
+const clientIdHeader = "Client-Id"
 
 //go:embed livereload.html
 var lrScript []byte
@@ -20,13 +21,26 @@ var pleaseReload = []byte("1")
 var dontReload = []byte("0")
 
 var state struct {
-	shouldReload bool
-	mut          sync.RWMutex
+	// Maps each client ID to whether they should reload on next ajax request.
+	//
+	// Client IDs are generated on client side so that an open tab's
+	// livereload feature keeps working even when the server is restarted.
+	clients map[string]bool
+	mut     sync.RWMutex
 }
 
 func init() {
-	lrScript = bytes.ReplaceAll(lrScript, []byte("{{LR_ENDPOINT}}"), []byte(endpoint))
-	lrScript = bytes.ReplaceAll(lrScript, []byte("{{SHOULD_RELOAD}}"), pleaseReload)
+	state.clients = make(map[string]bool)
+
+	lrScript = bytes.ReplaceAll(
+		lrScript, []byte("{{LR_ENDPOINT}}"), []byte(endpoint),
+	)
+	lrScript = bytes.ReplaceAll(
+		lrScript, []byte("{{PLEASE_RELOAD}}"), pleaseReload,
+	)
+	lrScript = bytes.ReplaceAll(
+		lrScript, []byte("{{CLIENT_ID_HEADER}}"), []byte(clientIdHeader),
+	)
 }
 
 // For html pages, insert a script tag to enable livereload
@@ -36,14 +50,26 @@ func Middleware(fsys writablefs.FS, f http.Handler) http.Handler {
 
 		// Handle AJAX endpoint
 		if path == endpoint {
+			clientId := r.Header.Get(clientIdHeader)
 			state.mut.RLock()
-			shouldReload := state.shouldReload
+			shouldReload, ok := state.clients[clientId]
 			state.mut.RUnlock()
 
+			// New client: add client to state, don't reload
+			if !ok {
+				//fmt.Println("New livereload client:", clientId)
+				state.mut.Lock()
+				state.clients[clientId] = false
+				state.mut.Unlock()
+				w.Write(dontReload)
+				return
+			}
+
+			// Existing client:
 			if shouldReload {
 				w.Write(pleaseReload)
 				state.mut.Lock()
-				state.shouldReload = false
+				state.clients[clientId] = false
 				state.mut.Unlock()
 			} else {
 				w.Write(dontReload)
@@ -76,8 +102,10 @@ func Middleware(fsys writablefs.FS, f http.Handler) http.Handler {
 
 func Trigger() {
 	state.mut.Lock()
-	state.shouldReload = true
-	state.mut.Unlock()
+	defer state.mut.Unlock()
+	for k := range state.clients {
+		state.clients[k] = true
+	}
 }
 
 func withLiveReload(original []byte) []byte {
