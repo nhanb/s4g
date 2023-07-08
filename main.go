@@ -14,6 +14,8 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"go.imnhan.com/webmaker2000/djot"
+	"go.imnhan.com/webmaker2000/livereload"
+	"go.imnhan.com/webmaker2000/writablefs"
 )
 
 const DJOT_EXT = ".dj"
@@ -32,7 +34,7 @@ func main() {
 		panic(err)
 	}
 
-	fsys := WriteDirFS(absolutePath)
+	fsys := writablefs.WriteDirFS(absolutePath)
 
 	regenerate(fsys)
 
@@ -45,18 +47,19 @@ func main() {
 	closeWatcher := WatchLocalFS(fsys, func() {
 		fmt.Println("Change detected. Regenerating...")
 		regenerate(fsys)
+		livereload.Trigger()
 	})
 	defer closeWatcher()
 
 	println("Serving local website at http://localhost:" + port)
-	http.Handle("/", http.FileServer(http.FS(fsys)))
+	http.Handle("/", livereload.Middleware(fsys, http.FileServer(http.FS(fsys))))
 	err = http.ListenAndServe("127.0.0.1:"+port, nil)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func regenerate(fsys WritableFS) {
+func regenerate(fsys writablefs.FS) {
 	defer timer("Took %s")()
 	site := readSiteMetadata(fsys)
 	articles := findArticles(fsys)
@@ -117,7 +120,7 @@ type SiteMetadata struct {
 	}
 }
 
-func readSiteMetadata(fsys WritableFS) SiteMetadata {
+func readSiteMetadata(fsys writablefs.FS) SiteMetadata {
 	sm := SiteMetadata{
 		HomePath:     "/",
 		ShowFooter:   true,
@@ -131,7 +134,7 @@ func readSiteMetadata(fsys WritableFS) SiteMetadata {
 }
 
 type Article struct {
-	Fs       WritableFS
+	Fs       writablefs.FS
 	Path     string
 	WebPath  string
 	DjotBody string
@@ -192,7 +195,7 @@ func (a *Article) WriteHtmlFile(
 }
 
 func WriteHomePage(
-	fsys WritableFS,
+	fsys writablefs.FS,
 	site SiteMetadata,
 	articlesInFeed, articlesInNav []Article,
 	startYear int,
@@ -229,7 +232,7 @@ func WriteHomePage(
 	fsys.WriteFile("index.html", buf.Bytes())
 }
 
-func findArticles(fsys WritableFS) (result []Article) {
+func findArticles(fsys writablefs.FS) (result []Article) {
 
 	fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() || !strings.HasSuffix(d.Name(), DJOT_EXT) {

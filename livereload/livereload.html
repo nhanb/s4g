@@ -1,0 +1,11 @@
+<script>
+  setInterval(() => {
+    fetch("{{LR_ENDPOINT}}")
+      .then((resp) => resp.text())
+      .then((text) => {
+        if (text === "{{SHOULD_RELOAD}}") {
+          location.reload();
+        }
+      });
+  }, 500);
+</script>

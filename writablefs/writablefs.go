@@ -1,4 +1,4 @@
-package main
+package writablefs
 
 import (
 	"io/fs"
@@ -6,14 +6,14 @@ import (
 	"path/filepath"
 )
 
-type WritableFS interface {
+type FS interface {
 	fs.FS
 	WriteFile(path string, content []byte) error
 	Path() string
 }
 
 // Like os.DirFS but is writable
-func WriteDirFS(path string) WritableFS {
+func WriteDirFS(path string) FS {
 	return writeDirFS(path)
 }
 

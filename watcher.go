@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
+	"go.imnhan.com/webmaker2000/writablefs"
 )
 
 var WATCHED_EXTS = []string{DJOT_EXT, SITE_EXT, ".tmpl"}
@@ -17,7 +18,7 @@ const debounceInterval = 500 * time.Millisecond
 // Watches for relevant changes in FS, debounces by debounceInterval,
 // then executes callback.
 // Returns cleanup function.
-func WatchLocalFS(fsys WritableFS, callback func()) (Close func() error) {
+func WatchLocalFS(fsys writablefs.FS, callback func()) (Close func() error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		panic(err)
