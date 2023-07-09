@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
@@ -25,7 +26,7 @@ func WatchLocalFS(fsys writablefs.FS, callback func()) (Close func() error) {
 	}
 
 	fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
-		if !d.IsDir() {
+		if !d.IsDir() || shouldIgnore(path) {
 			return nil
 		}
 
@@ -51,13 +52,17 @@ func WatchLocalFS(fsys writablefs.FS, callback func()) (Close func() error) {
 					return
 				}
 
+				//fmt.Println("EVENT:", event.Op, event.Name)
+
+				if shouldIgnore(event.Name) {
+					break
+				}
+
 				// Avoid infinite loop
 				if event.Has(fsnotify.Write) &&
 					!contains(WATCHED_EXTS, filepath.Ext(event.Name)) {
 					break
 				}
-
-				//fmt.Println("EVENT:", event.Op, event.Name)
 
 				// Dynamically watch new/renamed folders
 				if event.Has(fsnotify.Create) || event.Has(fsnotify.Rename) {
@@ -100,4 +105,11 @@ func printWatchList(w *fsnotify.Watcher) {
 	for _, path := range w.WatchList() {
 		fmt.Println("  " + path)
 	}
+}
+
+// Ignore swap and dot files/dirs, which are typically editor
+// temp files or supporting data like .git.
+func shouldIgnore(path string) bool {
+	fname := filepath.Base(path)
+	return fname[0] == '.' || strings.HasSuffix(fname, ".swp")
 }
