@@ -20,18 +20,18 @@ var lrScript []byte
 var pleaseReload = []byte("1")
 var dontReload = []byte("0")
 
-var state struct {
+var state = struct {
 	// Maps each client ID to whether they should reload on next ajax request.
 	//
 	// Client IDs are generated on client side so that an open tab's
 	// livereload feature keeps working even when the server is restarted.
 	clients map[string]bool
 	mut     sync.RWMutex
+}{
+	clients: make(map[string]bool),
 }
 
 func init() {
-	state.clients = make(map[string]bool)
-
 	lrScript = bytes.ReplaceAll(
 		lrScript, []byte("{{LR_ENDPOINT}}"), []byte(endpoint),
 	)
