@@ -26,7 +26,7 @@ func WatchLocalFS(fsys writablefs.FS, callback func()) (Close func() error) {
 	}
 
 	fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
-		if !d.IsDir() || shouldIgnore(path) {
+		if !d.IsDir() || (shouldIgnore(path) && path != ".") {
 			return nil
 		}
 

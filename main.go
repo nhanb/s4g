@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"io/fs"
+	"log"
 	"net/http"
 	"path/filepath"
 	"sort"
@@ -24,10 +25,20 @@ const SITE_FILENAME = "website" + SITE_EXT
 const FEED_PATH = "feed.xml"
 
 func main() {
-	var port, folder string
+	var port, folder, new string
+	flag.StringVar(&new, "new", "", "Path for new site to make")
 	flag.StringVar(&port, "port", "3338", "Port for local preview server")
 	flag.StringVar(&folder, "folder", "www", "Web folder")
 	flag.Parse()
+
+	if new != "" {
+		fmt.Println("Making new site at", new)
+		err := makeSite(new, newSiteMetadata())
+		if err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
 
 	absolutePath, err := filepath.Abs(folder)
 	if err != nil {
@@ -62,8 +73,16 @@ func main() {
 
 func regenerate(fsys writablefs.FS) {
 	defer timer("Took %s")()
+
 	site := readSiteMetadata(fsys)
 	articles := findArticles(fsys)
+
+	if len(articles) == 0 {
+		fmt.Println("No articles found.")
+		fsys.RemoveAll("index.html")
+		fsys.RemoveAll(FEED_PATH)
+		return
+	}
 
 	// Sort articles, newest first
 	sort.Slice(articles, func(i int, j int) bool {
@@ -121,12 +140,16 @@ type SiteMetadata struct {
 	}
 }
 
-func readSiteMetadata(fsys writablefs.FS) SiteMetadata {
-	sm := SiteMetadata{
+func newSiteMetadata() SiteMetadata {
+	return SiteMetadata{
 		HomePath:     "/",
 		ShowFooter:   true,
 		GenerateHome: true,
 	}
+}
+
+func readSiteMetadata(fsys writablefs.FS) SiteMetadata {
+	sm := newSiteMetadata()
 	_, err := toml.DecodeFS(fsys, SITE_FILENAME, &sm)
 	if err != nil {
 		panic(err)

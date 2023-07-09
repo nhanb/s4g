@@ -9,6 +9,7 @@ import (
 type FS interface {
 	fs.FS
 	WriteFile(path string, content []byte) error
+	RemoveAll(path string) error
 	Path() string
 }
 
@@ -21,6 +22,10 @@ type writeDirFS string
 
 func (w writeDirFS) Open(name string) (fs.File, error) {
 	return os.DirFS(string(w)).Open(name)
+}
+func (w writeDirFS) RemoveAll(path string) error {
+	fullPath := filepath.Join(string(w), path)
+	return os.RemoveAll(fullPath)
 }
 
 func (w writeDirFS) WriteFile(path string, content []byte) error {
