@@ -16,11 +16,13 @@ import (
 var defaultTheme embed.FS
 
 func makeSite(path string, meta SiteMetadata) error {
+	// Create web root dir
 	err := os.MkdirAll(path, 0755)
 	if err != nil {
 		return fmt.Errorf("make site: %w", err)
 	}
 
+	// Create site metadata file
 	metaFilePath := filepath.Join(path, SITE_FILENAME)
 	metaFile, err := os.Create(metaFilePath)
 	if err != nil {
@@ -34,7 +36,9 @@ func makeSite(path string, meta SiteMetadata) error {
 		return fmt.Errorf("write site metadata: %w", err)
 	}
 
+	// Copy default theme into new site
 	copyTheme(defaultTheme, path)
+
 	return nil
 }
 

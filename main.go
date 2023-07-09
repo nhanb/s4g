@@ -84,6 +84,8 @@ func regenerate(fsys writablefs.FS) {
 		return
 	}
 
+	generatedFiles := make(map[string]bool)
+
 	// Sort articles, newest first
 	sort.Slice(articles, func(i int, j int) bool {
 		return articles[i].PostedAt.Compare(articles[j].PostedAt) > 0
@@ -111,11 +113,13 @@ func regenerate(fsys writablefs.FS) {
 	for _, a := range articles {
 		fmt.Println(">", a.Path, "-", a.Title)
 		a.WriteHtmlFile(&site, articlesInNav, startYear)
+		generatedFiles[a.WebPath] = true
 	}
 	fmt.Printf("Processed %d articles\n", len(articles))
 
 	if site.GenerateHome {
 		WriteHomePage(fsys, site, articlesInFeed, articlesInNav, startYear)
+		generatedFiles["index.html"] = true
 		fmt.Println("Generated index.html")
 	}
 
@@ -123,7 +127,11 @@ func regenerate(fsys writablefs.FS) {
 		FEED_PATH,
 		generateFeed(site, articlesInFeed, site.HomePath+FEED_PATH),
 	)
+	generatedFiles[FEED_PATH] = true
 	fmt.Println("Generated", FEED_PATH)
+
+	DeleteOldGeneratedFiles(fsys, generatedFiles)
+	WriteManifest(fsys, generatedFiles)
 }
 
 type SiteMetadata struct {

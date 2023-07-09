@@ -111,5 +111,7 @@ func printWatchList(w *fsnotify.Watcher) {
 // temp files or supporting data like .git.
 func shouldIgnore(path string) bool {
 	fname := filepath.Base(path)
-	return fname[0] == '.' || strings.HasSuffix(fname, ".swp")
+	return fname[0] == '.' ||
+		fname == ManifestPath ||
+		strings.HasSuffix(fname, ".swp")
 }
