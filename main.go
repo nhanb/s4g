@@ -40,6 +40,9 @@ func main() {
 		return
 	}
 
+	djot.StartService()
+	fmt.Println("Started djot.js service")
+
 	absolutePath, err := filepath.Abs(folder)
 	if err != nil {
 		panic(err)

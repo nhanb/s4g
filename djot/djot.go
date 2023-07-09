@@ -1,3 +1,4 @@
+// Must run djot.StartService() before using it.
 package djot
 
 import (
@@ -26,12 +27,7 @@ type djotJSProc struct {
 
 var service djotJSProc
 
-func init() {
-	service = StartService()
-	fmt.Println("Started djot.js service")
-}
-
-func StartService() djotJSProc {
+func StartService() {
 	cmd := exec.Command("node", "-e", djotFullScript)
 
 	stdin, err := cmd.StdinPipe()
@@ -64,7 +60,7 @@ func StartService() djotJSProc {
 		panic(err)
 	}
 
-	return djotJSProc{cmd: cmd, writer: writer, scanner: scanner}
+	service = djotJSProc{cmd: cmd, writer: writer, scanner: scanner}
 }
 
 func splitAtDelimiter(data []byte, atEOF bool) (advance int, token []byte, err error) {
