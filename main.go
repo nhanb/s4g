@@ -116,7 +116,7 @@ func regenerate(fsys writablefs.FS) {
 	for _, a := range articles {
 		fmt.Println(">", a.Path, "-", a.Title)
 		a.WriteHtmlFile(&site, articlesInNav, startYear)
-		generatedFiles[a.WebPath] = true
+		generatedFiles[a.OutputPath] = true
 	}
 	fmt.Printf("Processed %d articles\n", len(articles))
 
@@ -169,10 +169,10 @@ func readSiteMetadata(fsys writablefs.FS) SiteMetadata {
 }
 
 type Article struct {
-	Fs       writablefs.FS
-	Path     string
-	WebPath  string
-	DjotBody string
+	Fs         writablefs.FS
+	Path       string
+	OutputPath string
+	DjotBody   string
 	ArticleMetadata
 }
 
@@ -183,6 +183,14 @@ type ArticleMetadata struct {
 	Templates  []string
 	ShowInFeed bool
 	ShowInNav  bool
+}
+
+func (a *Article) WebPath() string {
+	p := a.OutputPath
+	if strings.HasSuffix(p, "/index.html") {
+		p = strings.TrimSuffix(p, "index.html")
+	}
+	return p
 }
 
 func (a *Article) WriteHtmlFile(
@@ -223,7 +231,7 @@ func (a *Article) WriteHtmlFile(
 	fullHtml := buf.Bytes()
 
 	// Now write into an html with the same name as the original djot file
-	err = a.Fs.WriteFile(a.WebPath, fullHtml)
+	err = a.Fs.WriteFile(a.OutputPath, fullHtml)
 	if err != nil {
 		panic(err)
 	}
@@ -301,7 +309,7 @@ func findArticles(fsys writablefs.FS) (result []Article) {
 		article := Article{
 			Fs:              fsys,
 			Path:            path,
-			WebPath:         strings.TrimSuffix(path, DjotExt) + ".html",
+			OutputPath:      strings.TrimSuffix(path, DjotExt) + ".html",
 			DjotBody:        bodyText,
 			ArticleMetadata: meta,
 		}

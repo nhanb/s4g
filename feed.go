@@ -17,8 +17,8 @@ func generateFeed(site SiteMetadata, posts []Article, path string) []byte {
 	var entries []*atom.Entry
 	for _, p := range posts {
 		entries = append(entries, &atom.Entry{
-			ID:        siteAddr + p.WebPath,
-			Link:      []atom.Link{{Href: siteAddr + p.WebPath}},
+			ID:        siteAddr + p.WebPath(),
+			Link:      []atom.Link{{Href: siteAddr + p.WebPath()}},
 			Title:     p.Title,
 			Published: atom.Time(p.PostedAt),
 			Updated:   atom.Time(p.PostedAt),

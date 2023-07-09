@@ -17,8 +17,8 @@
   </entry>
   <entry>
     <title>Hello</title>
-    <id>https://coolzone.example.com/hello/index.html</id>
-    <link href="https://coolzone.example.com/hello/index.html"></link>
+    <id>https://coolzone.example.com/hello/</id>
+    <link href="https://coolzone.example.com/hello/"></link>
     <published>2022-01-02T00:00:00+07:00</published>
     <updated>2022-01-02T00:00:00+07:00</updated>
   </entry>
