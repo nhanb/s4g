@@ -23,7 +23,7 @@ func makeSite(path string, meta SiteMetadata) error {
 	}
 
 	// Create site metadata file
-	metaFilePath := filepath.Join(path, SITE_FILENAME)
+	metaFilePath := filepath.Join(path, SiteFileName)
 	metaFile, err := os.Create(metaFilePath)
 	if err != nil {
 		return fmt.Errorf("create site metadata: %w", err)

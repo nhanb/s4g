@@ -12,7 +12,7 @@ import (
 	"go.imnhan.com/webmaker2000/writablefs"
 )
 
-var WATCHED_EXTS = []string{DJOT_EXT, SITE_EXT, ".tmpl"}
+var WatchedExts = []string{DjotExt, SiteExt, ".tmpl"}
 
 const debounceInterval = 500 * time.Millisecond
 
@@ -60,7 +60,7 @@ func WatchLocalFS(fsys writablefs.FS, callback func()) (Close func() error) {
 
 				// Avoid infinite loop
 				if event.Has(fsnotify.Write) &&
-					!contains(WATCHED_EXTS, filepath.Ext(event.Name)) {
+					!contains(WatchedExts, filepath.Ext(event.Name)) {
 					break
 				}
 

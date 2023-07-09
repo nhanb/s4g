@@ -19,10 +19,10 @@ import (
 	"go.imnhan.com/webmaker2000/writablefs"
 )
 
-const DJOT_EXT = ".dj"
-const SITE_EXT = ".wbmkr2k"
-const SITE_FILENAME = "website" + SITE_EXT
-const FEED_PATH = "feed.xml"
+const DjotExt = ".dj"
+const SiteExt = ".wbmkr2k"
+const SiteFileName = "website" + SiteExt
+const FeedPath = "feed.xml"
 
 func main() {
 	var port, folder, new string
@@ -80,7 +80,7 @@ func regenerate(fsys writablefs.FS) {
 	if len(articles) == 0 {
 		fmt.Println("No articles found.")
 		fsys.RemoveAll("index.html")
-		fsys.RemoveAll(FEED_PATH)
+		fsys.RemoveAll(FeedPath)
 		return
 	}
 
@@ -124,11 +124,11 @@ func regenerate(fsys writablefs.FS) {
 	}
 
 	fsys.WriteFile(
-		FEED_PATH,
-		generateFeed(site, articlesInFeed, site.HomePath+FEED_PATH),
+		FeedPath,
+		generateFeed(site, articlesInFeed, site.HomePath+FeedPath),
 	)
-	generatedFiles[FEED_PATH] = true
-	fmt.Println("Generated", FEED_PATH)
+	generatedFiles[FeedPath] = true
+	fmt.Println("Generated", FeedPath)
 
 	DeleteOldGeneratedFiles(fsys, generatedFiles)
 	WriteManifest(fsys, generatedFiles)
@@ -158,7 +158,7 @@ func newSiteMetadata() SiteMetadata {
 
 func readSiteMetadata(fsys writablefs.FS) SiteMetadata {
 	sm := newSiteMetadata()
-	_, err := toml.DecodeFS(fsys, SITE_FILENAME, &sm)
+	_, err := toml.DecodeFS(fsys, SiteFileName, &sm)
 	if err != nil {
 		panic(err)
 	}
@@ -209,7 +209,7 @@ func (a *Article) WriteHtmlFile(
 		Title:         fmt.Sprintf("%s | %s", a.Title, site.Name),
 		Post:          a,
 		ArticlesInNav: articlesInNav,
-		Feed:          site.HomePath + FEED_PATH,
+		Feed:          site.HomePath + FeedPath,
 		Now:           time.Now(),
 		StartYear:     startYear,
 	})
@@ -253,7 +253,7 @@ func WriteHomePage(
 		Title:          fmt.Sprintf("%s - %s", site.Name, site.Tagline),
 		ArticlesInFeed: articlesInFeed,
 		ArticlesInNav:  articlesInNav,
-		Feed:           site.HomePath + FEED_PATH,
+		Feed:           site.HomePath + FeedPath,
 		Now:            time.Now(),
 		StartYear:      startYear,
 	})
@@ -267,7 +267,7 @@ func WriteHomePage(
 func findArticles(fsys writablefs.FS) (result []Article) {
 
 	fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
-		if d.IsDir() || !strings.HasSuffix(d.Name(), DJOT_EXT) {
+		if d.IsDir() || !strings.HasSuffix(d.Name(), DjotExt) {
 			return nil
 		}
 
@@ -298,7 +298,7 @@ func findArticles(fsys writablefs.FS) (result []Article) {
 		article := Article{
 			Fs:              fsys,
 			Path:            path,
-			WebPath:         strings.TrimSuffix(path, DJOT_EXT) + ".html",
+			WebPath:         strings.TrimSuffix(path, DjotExt) + ".html",
 			DjotBody:        bodyText,
 			ArticleMetadata: meta,
 		}
