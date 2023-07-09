@@ -43,7 +43,8 @@ func main() {
 	// - Devise some sort of dependency graph
 	// - Filter out relevant FS events: this seems daunting considering the
 	// differences between OSes and applications (e.g. vim writes to temp file
-	// then renames)
+	// then renames), and fsnotify's inability to tell if the event came from a
+	// directory.
 	closeWatcher := WatchLocalFS(fsys, func() {
 		fmt.Println("Change detected. Regenerating...")
 		regenerate(fsys)
