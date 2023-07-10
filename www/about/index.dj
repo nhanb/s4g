@@ -1,7 +1,7 @@
 +++
-Title = "About"
-ShowInFeed = false
-ShowInNav = true
+Title: About
+ShowInFeed: false
+ShowInNav: true
 +++
 
 ## About this site

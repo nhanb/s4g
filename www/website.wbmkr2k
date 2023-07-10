@@ -1,11 +1,7 @@
-# vim: ft=toml
-# -*- mode: toml; -*-
+Address: https://coolzone.example.com
+Name: CoolZone
+Tagline: Cool people only.
 
-Address = "https://coolzone.example.com"
-Name = "CoolZone"
-Tagline = "Cool people only."
-
-[Author]
-Name = "Coolio McCool"
-URI = "https://author.example.com"
-Email = "coolio@example.com"
+AuthorName: Coolio McCool
+AuthorURI: https://author.example.com
+AuthorEmail: coolio@example.com

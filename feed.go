@@ -31,9 +31,9 @@ func generateFeed(site SiteMetadata, posts []Article, path string) []byte {
 		Updated: atom.Time(posts[0].PostedAt),
 		Entry:   entries,
 		Author: &atom.Person{
-			Name:  site.Author.Name,
-			URI:   site.Author.URI,
-			Email: site.Author.Email,
+			Name:  site.AuthorName,
+			URI:   site.AuthorURI,
+			Email: site.AuthorEmail,
 		},
 		Link: []atom.Link{{Rel: "self", Href: path}},
 	}

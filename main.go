@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/BurntSushi/toml"
 	"go.imnhan.com/webmaker2000/djot"
 	"go.imnhan.com/webmaker2000/livereload"
 	"go.imnhan.com/webmaker2000/writablefs"
@@ -34,7 +33,7 @@ func main() {
 
 	if new != "" {
 		fmt.Println("Making new site at", new)
-		err := makeSite(new, newSiteMetadata())
+		err := makeSite(new, NewSiteMetadata())
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -78,7 +77,7 @@ func main() {
 func regenerate(fsys writablefs.FS) {
 	defer timer("Took %s")()
 
-	site := readSiteMetadata(fsys)
+	site := ReadSiteMetadata(fsys)
 	articles := findArticles(fsys)
 
 	if len(articles) == 0 {
@@ -138,37 +137,6 @@ func regenerate(fsys writablefs.FS) {
 	WriteManifest(fsys, generatedFiles)
 }
 
-type SiteMetadata struct {
-	Address      string
-	Name         string
-	Tagline      string
-	HomePath     string
-	ShowFooter   bool
-	GenerateHome bool
-	Author       struct {
-		Name  string
-		URI   string
-		Email string
-	}
-}
-
-func newSiteMetadata() SiteMetadata {
-	return SiteMetadata{
-		HomePath:     "/",
-		ShowFooter:   true,
-		GenerateHome: true,
-	}
-}
-
-func readSiteMetadata(fsys writablefs.FS) SiteMetadata {
-	sm := newSiteMetadata()
-	_, err := toml.DecodeFS(fsys, SiteFileName, &sm)
-	if err != nil {
-		panic(err)
-	}
-	return sm
-}
-
 type Article struct {
 	Fs         writablefs.FS
 	Path       string
@@ -176,15 +144,6 @@ type Article struct {
 	webPath    string
 	DjotBody   string
 	ArticleMetadata
-}
-
-type ArticleMetadata struct {
-	Title      string
-	IsDraft    bool
-	PostedAt   time.Time
-	Templates  []string
-	ShowInFeed bool
-	ShowInNav  bool
 }
 
 func (a *Article) WebPath() string {
@@ -313,7 +272,7 @@ func findArticles(fsys writablefs.FS) (result []Article) {
 			ShowInFeed: true,
 			ShowInNav:  false,
 		}
-		_, err = toml.Decode(metaText, &meta)
+		err = UnmarshalMetadata([]byte(metaText), &meta)
 		if err != nil {
 			fmt.Printf("FIXME: Malformed article metadata in %s: %s\n", path, err)
 			return nil

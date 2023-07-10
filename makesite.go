@@ -8,8 +8,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
-	"github.com/BurntSushi/toml"
 )
 
 //go:embed theme
@@ -22,16 +20,9 @@ func makeSite(path string, meta SiteMetadata) error {
 		return fmt.Errorf("make site: %w", err)
 	}
 
-	// Create site metadata file
-	metaFilePath := filepath.Join(path, SiteFileName)
-	metaFile, err := os.Create(metaFilePath)
-	if err != nil {
-		return fmt.Errorf("create site metadata: %w", err)
-	}
-	defer metaFile.Close()
-
-	metaEncoder := toml.NewEncoder(metaFile)
-	err = metaEncoder.Encode(meta)
+	// Write site metadata file
+	data := MarshalMetadata(&meta)
+	err = ioutil.WriteFile(filepath.Join(path, SiteFileName), data, 0664)
 	if err != nil {
 		return fmt.Errorf("write site metadata: %w", err)
 	}
