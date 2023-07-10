@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"net/url"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -172,6 +173,7 @@ type Article struct {
 	Fs         writablefs.FS
 	Path       string
 	OutputPath string
+	webPath    string
 	DjotBody   string
 	ArticleMetadata
 }
@@ -186,11 +188,22 @@ type ArticleMetadata struct {
 }
 
 func (a *Article) WebPath() string {
-	p := a.OutputPath
-	if strings.HasSuffix(p, "/index.html") {
-		p = strings.TrimSuffix(p, "index.html")
+	if a.webPath != "" {
+		return a.webPath
 	}
-	return p
+	path := a.OutputPath
+	if strings.HasSuffix(path, "/index.html") {
+		path = strings.TrimSuffix(path, "index.html")
+	}
+
+	parts := strings.Split(path, "/")
+	escaped := make([]string, len(parts))
+	for i := 0; i < len(parts); i++ {
+		escaped[i] = url.PathEscape(parts[i])
+	}
+
+	a.webPath = strings.Join(escaped, "/")
+	return a.webPath
 }
 
 func (a *Article) WriteHtmlFile(
