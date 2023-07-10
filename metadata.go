@@ -86,6 +86,14 @@ func UnmarshalMetadata(data []byte, dest any) error {
 				}
 				s.Field(i).Set(reflect.ValueOf(tVal))
 
+			case "[]string":
+				parts := strings.Split(val, ",")
+				trimmed := make([]string, len(parts))
+				for i := 0; i < len(parts); i++ {
+					trimmed[i] = strings.TrimSpace(parts[i])
+				}
+				s.Field(i).Set(reflect.ValueOf(trimmed))
+
 			default:
 				panic(fmt.Sprintf(
 					"unsupported metadata field type: %s",
