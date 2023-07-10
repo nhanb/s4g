@@ -1,5 +1,5 @@
 about/index.html
 feed.xml
-hello/index.html
 index.html
 mfws.html
+scale/index.html

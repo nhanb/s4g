@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>I&#39;m Going To Scale My Foot Up Your Ass | CoolZone</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="alternate" type="application/atom+xml" title="Atom feed" href="/feed.xml">
+  <link rel="stylesheet" href="/_theme/base.css">
+  <link rel="stylesheet" href="/_theme/post.css">
+</head>
+
+<body>
+
+<nav>
+  <a href="/">Home</a>
+  <a href="/about/">About</a>
+  <span class="posted-on">
+    Posted on
+    <time datetime="2008-04-24">
+        Thursday, 24 Apr 2008
+    </time>
+  </span>
+
+</nav>
+
+<hr>
+
+<h1 class="post-title">I&#39;m Going To Scale My Foot Up Your Ass</h1>
+<content>
+<p><img alt="scaleboner" src="bill.jpg"></p>
+<p><em>by <a href="http://widgetsandshit.com/teddziuba/2008/04/im-going-to-scale-my-foot-up-y.html">Ted Dziuba</a></em></p>
+<p>Engineers love to talk about scalability.  It makes us feel like the bad ass,
+dick-swingin’ motherfuckers that we wish we could be.</p>
+<p>After we talk about scalability with our co-workers (<em>Yeah, Rails doesn’t
+scale!</em>), we flex our true engineering prowess by writing a post about it on
+our blog.  Once that post hits Reddit, son, everyone will know how hardcore you
+really are.  Respect.</p>
+<section id="People-Who-Talk-Big-About-Scalability-Don-t-Need-To-Worry-About-It">
+<h2>People Who Talk Big About Scalability Don’t Need To Worry About It</h2>
+<p>Fact:  every chest-thumping blog post I have seen written about scalability is
+either about architecture, Memcached, or both.  Some asshole who writes shitty
+code starts pontificating about <em>“scalable architecture”</em> with data storage,
+web frontends, whatever-the-fuck.  Dude, your app isn’t having scalability
+problems because of the <em>architecture</em>.  It’s having scalability problems
+because you coded a ton of N^2 loops into it and you’re too self-important to
+get peer reviews on your commits.</p>
+<p>And let’s not forget the tools who discover Memcached for the first time,
+install it on a web server, and notice how fast their app runs now.  Yeah,
+welcome to the modern age.  Hope you know what a cache expiry policy is.</p>
+</section>
+<section id="If-You-Haven-t-Discussed-Capacity-Planning-You-Can-t-Discuss-Scalability">
+<h2>If You Haven’t Discussed Capacity Planning, You Can’t Discuss Scalability</h2>
+<p>You don’t need to worry about scalability on your Rails-over-Mysql application
+because nobody is going to use it.  Really.  Believe me.  You’re going to get,
+at most, 1,000 people on your app, and maybe 1% of them will be 7-day active.
+Scalability is not your problem, getting people to give a shit is.</p>
+<p>Unless you know what you need to scale <em>to</em>, you can’t even begin to talk about
+scalability.  How many users do you want your system to handle? A thousand?
+Hundred thousand? Ten million?  Here’s a hint: the system you design to handle
+a quarter million users is going to be different from the system you design to
+handle ten million users.</p>
+<p>Of course you’ll point to the engineer’s wet dream: linear scalability.  <em>Lulz
+but when we get more users we just add more machines you are so stupid ted.
+uncov sucks.</em></p>
+<p>Yeah, great, well it doesn’t exist.  Oh no, go ahead and try out Amazon
+SimpleDB and think to yourself that it will scale linearly.  Then, when you get
+enough users that the latency becomes a problem, blame it on “those shitty
+Amazon datacenters”.</p>
+</section>
+<section id="Choosing-Technology-Don-t-Mean-Shit-If-You-Don-t-Know-How-To-Use-It">
+<h2>Choosing Technology Don’t Mean Shit If You Don’t Know How To Use It</h2>
+<p>The most common butthurt about scalability is this:  choose a technology.  If
+you like the technology, claim <em>“technology X scales better!”</em> If you don’t
+like it, claim <em>“technology X doesn’t scale!”</em></p>
+<p>Saying “Rails doesn’t scale” is like saying “my car doesn’t go infinitely
+fast”.  Alternatively, saying “We’ll have no problems scaling because we’re
+using Django” is like saying “I will win every race because my car is the most
+powerful”.  Maybe so, but you suck at driving, and you’re up against
+professionals.</p>
+<p>If you’re having scalability problems and blaming it on a single technology,
+chances are, you’re doing it wrong.</p>
+</section>
+<section id="tl-dr">
+<h2>tl;dr</h2>
+<p>Shut up about scalability, no one is using your app anyway.</p>
+<style>
+h2 { font-size: 1em; }
+body {
+background: linear-gradient(white, lightgrey);
+font-family: sans-serif;
+}
+img[alt="scaleboner"] { float: right; }
+</style>
+</section>
+
+</content>
+<footer>
+© 2008–2023 Coolio McCool<br>
+Made with <a href="https://github.com/nhanb/webmaker2000">WebMaker2000</a>
+</footer>
+
+</body>
+
+</html>
