@@ -142,7 +142,7 @@ type Article struct {
 	Path       string
 	OutputPath string
 	webPath    string
-	DjotBody   string
+	DjotBody   []byte
 	ArticleMetadata
 }
 
@@ -254,25 +254,24 @@ func findArticles(fsys writablefs.FS) (result []Article) {
 			return nil
 		}
 
-		fileContent, err := fs.ReadFile(fsys, path)
+		file, err := fsys.Open(path)
 		if err != nil {
 			panic(err)
 		}
+		defer file.Close()
 
-		parts := strings.SplitN(string(fileContent), "+++", 3)
-		if !(len(parts) == 3 && parts[0] == "") {
-			fmt.Printf("FIXME: Missing metadata in %s - Skipped.\n", path)
+		metaText, bodyText := SeparateMetadata(file)
+		if len(metaText) == 0 {
+			fmt.Printf("FIXME: Metadata not found in %s\n", path)
 			return nil
 		}
-		metaText := strings.TrimSpace(parts[1])
-		bodyText := strings.TrimSpace(parts[2])
 
 		meta := ArticleMetadata{
 			Templates:  []string{"_theme/base.tmpl", "_theme/post.tmpl"},
 			ShowInFeed: true,
 			ShowInNav:  false,
 		}
-		err = UnmarshalMetadata([]byte(metaText), &meta)
+		err = UnmarshalMetadata(metaText, &meta)
 		if err != nil {
 			fmt.Printf("FIXME: Malformed article metadata in %s: %s\n", path, err)
 			return nil

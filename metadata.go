@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
+	"io"
 	"io/fs"
 	"reflect"
 	"strings"
@@ -126,4 +129,28 @@ func metaTextToMap(s []byte) map[string]string {
 		result[strings.TrimSpace(key)] = strings.TrimSpace(val)
 	}
 	return result
+}
+
+var frontMatterSep = []byte("---")
+
+func SeparateMetadata(r io.Reader) (metadata []byte, body []byte) {
+	s := bufio.NewScanner(r)
+	readingFrontMatter := true
+	var buffer []byte
+	for s.Scan() {
+		line := bytes.TrimSpace(s.Bytes())
+
+		if readingFrontMatter && bytes.Equal(line, frontMatterSep) {
+			metadata = buffer
+			buffer = body
+			readingFrontMatter = false
+			continue
+		}
+
+		buffer = append(buffer, line...)
+		buffer = append(buffer, '\n')
+	}
+
+	body = buffer
+	return metadata, body
 }

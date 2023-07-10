@@ -72,8 +72,8 @@ func splitAtDelimiter(data []byte, atEOF bool) (advance int, token []byte, err e
 }
 
 // Not thread-safe.
-func ToHtml(input string) (result string) {
-	if _, err := service.writer.WriteString(input); err != nil {
+func ToHtml(input []byte) (result []byte) {
+	if _, err := service.writer.Write(input); err != nil {
 		panic(err)
 	}
 	if err := service.writer.WriteByte(delimiter); err != nil {
@@ -82,7 +82,10 @@ func ToHtml(input string) (result string) {
 	service.writer.Flush()
 
 	if !service.scanner.Scan() {
-		panic("scanner unexpectedly stopped while converting djot to html: " + input[:50])
+		panic(fmt.Sprintf(
+			"scanner unexpectedly stopped while converting djot to html: %s\n",
+			input[:50],
+		))
 	}
-	return service.scanner.Text()
+	return service.scanner.Bytes()
 }
