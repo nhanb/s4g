@@ -68,8 +68,10 @@ func Middleware(fsys writablefs.FS, f http.Handler) http.Handler {
 			// Existing client:
 			if shouldReload {
 				w.Write(pleaseReload)
+				// On reload, the browser tab will generate another client ID,
+				// so we can safely delete the old client ID now:
 				state.mut.Lock()
-				state.clients[clientId] = false
+				delete(state.clients, clientId)
 				state.mut.Unlock()
 			} else {
 				w.Write(dontReload)
@@ -110,6 +112,12 @@ func Trigger() {
 
 func withLiveReload(original []byte) []byte {
 	bodyEndPos := bytes.LastIndex(original, []byte("</body>"))
+	if bodyEndPos == -1 {
+		// If the HTML is so malformed that it doesn't close its body,
+		// then just append our livereload script at the end and hope
+		// for the best.
+		bodyEndPos = len(original)
+	}
 	result := make([]byte, len(original)+len(lrScript))
 	copy(result, original[:bodyEndPos])
 	copy(result[bodyEndPos:], lrScript)
