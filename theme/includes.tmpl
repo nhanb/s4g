@@ -1,0 +1,30 @@
+{{define "navbar"}}
+<link rel="stylesheet" href="{{.Site.HomePath}}_theme/navbar.css">
+<nav>
+  <a href="{{.Site.HomePath}}">Home</a>
+  {{- range .ArticlesInNav}}
+  <a href="{{$.Site.HomePath}}{{.WebPath}}">{{.Title}}</a>
+  {{- end}}
+
+  {{- if not .Post.PostedAt.IsZero}}
+  <span class="posted-on">
+    Posted on
+    <time datetime="{{.Post.PostedAt.Local.Format "2006-01-02"}}">
+        {{.Post.PostedAt.Local.Format "Monday, 02 Jan 2006"}}
+    </time>
+  </span>
+  {{- end}}
+
+</nav>
+<hr class="nav-hr">
+{{end}}
+
+
+{{define "footer"}}
+{{- if .Site.ShowFooter -}}
+<footer>
+© {{if eq .StartYear .Now.Year}}{{.StartYear}}{{else}}{{.StartYear}}–{{.Now.Year}}{{end}} {{.Site.AuthorName}}<br>
+Made with <a href="https://github.com/nhanb/webmaker2000">WebMaker2000</a>
+</footer>
+{{- end -}}
+{{- end}}

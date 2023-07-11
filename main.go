@@ -239,6 +239,7 @@ func WriteHomePage(
 		template.ParseFS(
 			fsys,
 			"_theme/base.tmpl",
+			"_theme/includes.tmpl",
 			"_theme/home.tmpl",
 		),
 	)
@@ -286,7 +287,11 @@ func findArticles(fsys writablefs.FS) (result []Article) {
 		}
 
 		meta := ArticleMetadata{
-			Templates:  []string{"$_theme/base.tmpl", "$_theme/post.tmpl"},
+			Templates: []string{
+				"$_theme/base.tmpl",
+				"$_theme/includes.tmpl",
+				"$_theme/post.tmpl",
+			},
 			ShowInFeed: true,
 			ShowInNav:  false,
 		}

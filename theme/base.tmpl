@@ -13,13 +13,6 @@
 <body>
 {{template "body" .}}
 
-{{- if .Site.ShowFooter}}
-<footer>
-© {{if eq .StartYear .Now.Year}}{{.StartYear}}{{else}}{{.StartYear}}–{{.Now.Year}}{{end}} {{.Site.AuthorName}}<br>
-Made with <a href="https://github.com/nhanb/webmaker2000">WebMaker2000</a>
-</footer>
-{{- end}}
-
 </body>
 
 </html>

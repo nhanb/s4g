@@ -1,30 +1,13 @@
-{{- define "head"}}
-  <link rel="stylesheet" href="{{.Site.HomePath}}_theme/post.css">
-{{- end}}
+{{- define "head"}}{{- end}}
 
 {{define "body"}}
-<nav>
-  <a href="{{.Site.HomePath}}">Home</a>
-  {{- range .ArticlesInNav}}
-  <a href="{{$.Site.HomePath}}{{.WebPath}}">{{.Title}}</a>
-  {{- end}}
 
-  {{- if not .Post.PostedAt.IsZero}}
-  <span class="posted-on">
-    Posted on
-    <time datetime="{{.Post.PostedAt.Local.Format "2006-01-02"}}">
-        {{.Post.PostedAt.Local.Format "Monday, 02 Jan 2006"}}
-    </time>
-  </span>
-  {{- end}}
+{{- template "navbar" .}}
 
-</nav>
-
-<hr>
-
-<h1 class="post-title">{{.Post.Title}}</h1>
-<content>
+<main>
+<h1>{{.Post.Title}}</h1>
 {{.Content}}
-</content>
+</main>
 
+{{template "footer" .}}
 {{- end}}

@@ -1,0 +1,77 @@
+{{- define "head"}}{{end}}
+
+{{- define "body" -}}
+
+<div class="navbar-container">
+{{- template "navbar" . -}}
+</div>
+
+<div class="main-container">
+  <main>
+  <h1>{{.Post.Title}}</h1>
+  {{.Content}}
+  </main>
+</div>
+
+<div class="footer-container">
+{{template "footer" .}}
+</div>
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+}
+html {
+  max-width: none;
+  font-family: sans-serif;
+}
+nav, main, footer {
+  margin: 0 auto;
+  max-width: 50rem;
+}
+
+.main-container, .navbar-container, .footer-container {
+  margin: 0;
+  padding: 0.5rem 1rem;
+}
+.main-container {
+  padding-top: 0;
+}
+
+.nav-hr {
+  border: none;
+  height:0;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-container, .footer-container {
+  background: linear-gradient(#ba4d44, #a92015);
+  text-shadow: 1px 1px #252626;
+  color: white;
+}
+nav a, footer a {
+  color: inherit;
+}
+
+.main-container {
+  background: linear-gradient(lightgrey, white);
+  padding-top: 0.1rem;
+}
+
+main {
+  background: linear-gradient(white, #dcdcdc, #dcdcdc);
+  border: 1px solid gray;
+  padding: 0 1rem;
+  background-color: white;
+  margin: 0.5rem auto;
+  box-shadow: 1px 1px 3px #6F6F6F;
+}
+
+
+h2 {
+  font-size: 1em;
+}
+</style>
+{{- end}}

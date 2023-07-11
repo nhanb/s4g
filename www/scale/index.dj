@@ -1,5 +1,6 @@
 Title: I'm Going To Scale My Foot Up Your Ass
 PostedAt: 2008-04-24
+Templates: $_theme/base.tmpl, $_theme/includes.tmpl, scale.tmpl
 ---
 
 ![scaleboner](bill.jpg)
@@ -71,11 +72,6 @@ Shut up about scalability, no one is using your app anyway.
 
 ``` =html
 <style>
-h2 { font-size: 1em; }
-body {
-    background: linear-gradient(white, lightgrey);
-    font-family: sans-serif;
-}
 img[alt="scaleboner"] { float: right; }
 </style>
 ```
