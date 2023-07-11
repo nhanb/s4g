@@ -10,6 +10,10 @@ ol {
   line-height: 1.35rem;
 }
 
+main img {
+  max-width: 100%;
+}
+
 footer {
   margin-top: 2rem;
   text-align: right;
