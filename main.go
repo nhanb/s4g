@@ -141,9 +141,10 @@ type Article struct {
 	Fs         writablefs.FS
 	Path       string
 	OutputPath string
-	webPath    string
 	DjotBody   []byte
 	ArticleMetadata
+	webPath       string
+	templatePaths []string
 }
 
 func (a *Article) WebPath() string {
@@ -165,6 +166,24 @@ func (a *Article) WebPath() string {
 	return a.webPath
 }
 
+func (a *Article) TemplatePaths() []string {
+	if len(a.templatePaths) > 0 {
+		return a.templatePaths
+	}
+	paths := make([]string, len(a.Templates))
+	for i := 0; i < len(paths); i++ {
+		p := a.Templates[i]
+		if strings.HasPrefix(p, "$") {
+			paths[i] = strings.TrimPrefix(p, "$")
+		} else {
+			paths[i] = filepath.Join(filepath.Dir(a.Path), p)
+		}
+	}
+
+	a.templatePaths = paths
+	return paths
+}
+
 func (a *Article) WriteHtmlFile(
 	site *SiteMetadata,
 	articlesInNav []Article,
@@ -176,7 +195,7 @@ func (a *Article) WriteHtmlFile(
 	// Then insert that content into the main template
 	var buf bytes.Buffer
 	// TODO: should probably reuse the template object for common cases
-	tmpl := template.Must(template.ParseFS(a.Fs, a.Templates...))
+	tmpl := template.Must(template.ParseFS(a.Fs, a.TemplatePaths()...))
 	err := tmpl.Execute(&buf, struct {
 		Site          *SiteMetadata
 		Content       template.HTML
@@ -267,7 +286,7 @@ func findArticles(fsys writablefs.FS) (result []Article) {
 		}
 
 		meta := ArticleMetadata{
-			Templates:  []string{"_theme/base.tmpl", "_theme/post.tmpl"},
+			Templates:  []string{"$_theme/base.tmpl", "$_theme/post.tmpl"},
 			ShowInFeed: true,
 			ShowInNav:  false,
 		}
