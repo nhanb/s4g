@@ -34,12 +34,14 @@
 
 <ul>
   <li>
-    2023-04-05 —
+    <span class="time-prefix">2023-04-05 — </span>
     <a href="/webmaker2000/mfws.html">This is a motherfucking website.</a>
+    <span class="time-suffix">(2023-04-05)</span>
   </li>
   <li>
-    2008-04-24 —
+    <span class="time-prefix">2008-04-24 — </span>
     <a href="/webmaker2000/scale/">I&#39;m Going To Scale My Foot Up Your Ass</a>
+    <span class="time-suffix">(2008-04-24)</span>
   </li>
 </ul>
 
@@ -67,8 +69,27 @@ hr {
 
 ul {
   padding: 0;
-  list-style-type: none;
+  list-style: none;
    
+}
+
+.time-suffix {
+  display: none;
+}
+
+@media (max-width: 30rem) {
+  .time-suffix {
+    display: inline;
+  }
+  .time-prefix {
+    display: none;
+  }
+  li {
+    margin-bottom: 0.5rem;
+  }
+  li::before {
+    content: '❖';
+  }
 }
 </style>
 

@@ -28,8 +28,9 @@
   {{- range .ArticlesInFeed}}
   {{- if not .IsDraft}}
   <li>
-    {{.PostedAt.Local.Format "2006-01-02"}} —
+    <span class="time-prefix">{{.PostedAt.Local.Format "2006-01-02"}} — </span>
     <a href="{{.WebPath}}">{{.Title}}</a>
+    <span class="time-suffix">({{.PostedAt.Local.Format "2006-01-02"}})</span>
   </li>
   {{- end}}
   {{- end}}
@@ -59,8 +60,27 @@ hr {
 
 ul {
   padding: 0;
-  list-style-type: none;
+  list-style: none;
   /*font-size: 1.1rem;*/
+}
+
+.time-suffix {
+  display: none;
+}
+
+@media (max-width: 30rem) {
+  .time-suffix {
+    display: inline;
+  }
+  .time-prefix {
+    display: none;
+  }
+  li {
+    margin-bottom: 0.5rem;
+  }
+  li::before {
+    content: '❖';
+  }
 }
 </style>
 
