@@ -14,15 +14,14 @@ import (
 )
 
 type SiteMetadata struct {
-	Address      string
-	Name         string
-	Tagline      string
-	Root         string
-	ShowFooter   bool
-	GenerateHome bool
-	AuthorName   string
-	AuthorURI    string
-	AuthorEmail  string
+	Address     string
+	Name        string
+	Tagline     string
+	Root        string
+	ShowFooter  bool
+	AuthorName  string
+	AuthorURI   string
+	AuthorEmail string
 }
 
 type ArticleMetadata struct {
@@ -36,9 +35,8 @@ type ArticleMetadata struct {
 
 func NewSiteMetadata() SiteMetadata {
 	return SiteMetadata{
-		Root:         "/",
-		ShowFooter:   true,
-		GenerateHome: true,
+		Root:       "/",
+		ShowFooter: true,
 	}
 }
 

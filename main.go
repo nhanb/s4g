@@ -159,16 +159,10 @@ func regenerate(fsys writablefs.FS) (site SiteMetadata) {
 
 	for _, a := range articles {
 		fmt.Println(">", a.Path, "-", a.Title)
-		a.WriteHtmlFile(&site, articlesInNav, startYear)
+		a.WriteHtmlFile(&site, articlesInNav, articlesInFeed, startYear)
 		generatedFiles[a.OutputPath] = true
 	}
 	fmt.Printf("Processed %d articles\n", len(articles))
-
-	if site.GenerateHome {
-		WriteHomePage(fsys, site, articlesInFeed, articlesInNav, startYear)
-		generatedFiles["index.html"] = true
-		fmt.Println("Generated index.html")
-	}
 
 	fsys.WriteFile(
 		FeedPath,
@@ -233,6 +227,7 @@ func (a *Article) TemplatePaths() []string {
 func (a *Article) WriteHtmlFile(
 	site *SiteMetadata,
 	articlesInNav []Article,
+	articlesInFeed []Article,
 	startYear int,
 ) {
 	// First generate the main content in html
@@ -243,23 +238,25 @@ func (a *Article) WriteHtmlFile(
 	// TODO: should probably reuse the template object for common cases
 	tmpl := template.Must(template.ParseFS(a.Fs, a.TemplatePaths()...))
 	err := tmpl.Execute(&buf, struct {
-		Site          *SiteMetadata
-		Content       template.HTML
-		Title         string
-		Post          *Article
-		ArticlesInNav []Article
-		Feed          string
-		Now           time.Time
-		StartYear     int
+		Site           *SiteMetadata
+		Content        template.HTML
+		Title          string
+		Post           *Article
+		ArticlesInNav  []Article
+		ArticlesInFeed []Article
+		Feed           string
+		Now            time.Time
+		StartYear      int
 	}{
-		Site:          site,
-		Content:       template.HTML(contentHtml),
-		Title:         fmt.Sprintf("%s | %s", a.Title, site.Name),
-		Post:          a,
-		ArticlesInNav: articlesInNav,
-		Feed:          site.Root + FeedPath,
-		Now:           time.Now(),
-		StartYear:     startYear,
+		Site:           site,
+		Content:        template.HTML(contentHtml),
+		Title:          a.Title,
+		Post:           a,
+		ArticlesInNav:  articlesInNav,
+		ArticlesInFeed: articlesInFeed,
+		Feed:           site.Root + FeedPath,
+		Now:            time.Now(),
+		StartYear:      startYear,
 	})
 	if err != nil {
 		fmt.Println("Error in WriteHtmlFile:", err)

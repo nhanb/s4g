@@ -1,0 +1,5 @@
+Title: Home
+ShowInNav: false
+ShowInFeed: false
+Templates: $_theme/base.tmpl, $_theme/includes.tmpl, $_theme/home.tmpl
+---
