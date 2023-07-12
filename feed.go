@@ -16,9 +16,11 @@ func generateFeed(site SiteMetadata, posts []Article, path string) []byte {
 	}
 	var entries []*atom.Entry
 	for _, p := range posts {
+		// trim WebPath's leading slash because siteAddr already has one
+		link := siteAddr + p.WebPath[1:]
 		entries = append(entries, &atom.Entry{
-			ID:        siteAddr + p.WebPath(),
-			Link:      []atom.Link{{Href: siteAddr + p.WebPath()}},
+			ID:        link,
+			Link:      []atom.Link{{Href: link}},
 			Title:     p.Title,
 			Published: atom.Time(p.PostedAt),
 			Updated:   atom.Time(p.PostedAt),

@@ -122,7 +122,7 @@ func regenerate(fsys writablefs.FS) (site SiteMetadata) {
 	defer timer("Took %s")()
 
 	site = ReadSiteMetadata(fsys)
-	articles := findArticles(fsys)
+	articles := findArticles(fsys, site)
 
 	if len(articles) == 0 {
 		fmt.Println("No articles found.")
@@ -183,27 +183,23 @@ type Article struct {
 	OutputPath string
 	DjotBody   []byte
 	ArticleMetadata
-	webPath       string
+	WebPath       string
 	templatePaths []string
 }
 
-func (a *Article) WebPath() string {
-	if a.webPath != "" {
-		return a.webPath
-	}
-	path := a.OutputPath
-	if strings.HasSuffix(path, "/index.html") {
-		path = strings.TrimSuffix(path, "index.html")
+func (a *Article) ComputeWebPath(root string) {
+	webPath := root + a.OutputPath
+	if strings.HasSuffix(webPath, "/index.html") {
+		webPath = strings.TrimSuffix(webPath, "index.html")
 	}
 
-	parts := strings.Split(path, "/")
+	parts := strings.Split(webPath, "/")
 	escaped := make([]string, len(parts))
 	for i := 0; i < len(parts); i++ {
 		escaped[i] = url.PathEscape(parts[i])
 	}
 
-	a.webPath = strings.Join(escaped, "/")
-	return a.webPath
+	a.WebPath = strings.Join(escaped, "/")
 }
 
 func (a *Article) TemplatePaths() []string {
@@ -310,7 +306,7 @@ func WriteHomePage(
 	fsys.WriteFile("index.html", buf.Bytes())
 }
 
-func findArticles(fsys writablefs.FS) (result []Article) {
+func findArticles(fsys writablefs.FS, site SiteMetadata) (result []Article) {
 
 	fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() || !strings.HasSuffix(d.Name(), DjotExt) {
@@ -351,6 +347,7 @@ func findArticles(fsys writablefs.FS) (result []Article) {
 			DjotBody:        bodyText,
 			ArticleMetadata: meta,
 		}
+		article.ComputeWebPath(site.Root)
 		result = append(result, article)
 		return nil
 	})

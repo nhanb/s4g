@@ -3,7 +3,7 @@
 <nav>
   <a href="{{.Site.Root}}">Home</a>
   {{- range .ArticlesInNav}}
-  <a href="{{$.Site.Root}}{{.WebPath}}">{{.Title}}</a>
+  <a href="{{.WebPath}}">{{.Title}}</a>
   {{- end}}
 
   {{- if not .Post.PostedAt.IsZero}}
