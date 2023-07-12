@@ -107,6 +107,11 @@ func handleServeCmd(folder, port string) {
 			http.StripPrefix(site.Root, http.FileServer(http.FS(fsys))),
 		),
 	)
+
+	if site.Root != "/" {
+		http.Handle("/", http.RedirectHandler(site.Root, http.StatusTemporaryRedirect))
+	}
+
 	err = http.ListenAndServe("127.0.0.1:"+port, nil)
 	if err != nil {
 		panic(err)
