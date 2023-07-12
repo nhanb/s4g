@@ -30,6 +30,14 @@ func makeSite(path string, meta SiteMetadata) error {
 	// Copy default theme into new site
 	copyTheme(defaultTheme, path)
 
+	// Write default index page
+	indexData := []byte(`Title: Home
+ShowInFeed: false
+Templates: $_theme/base.tmpl, $_theme/includes.tmpl, $_theme/home.tmpl
+---
+`)
+	err = ioutil.WriteFile(filepath.Join(path, "index.dj"), indexData, 0664)
+
 	return nil
 }
 

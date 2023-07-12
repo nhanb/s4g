@@ -21,6 +21,7 @@
 
 {{.Content}}
 
+{{if .ArticlesInFeed -}}
 <p>All posts, newest first:</p>
 
 <ul>
@@ -34,6 +35,9 @@
   {{- end}}
   {{- end}}
 </ul>
+{{else}}
+<p>No posts yet.</p>
+{{end}}
 
 <style>
 .site-title {

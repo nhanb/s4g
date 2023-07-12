@@ -36,8 +36,9 @@ type ArticleMetadata struct {
 
 func NewSiteMetadata() SiteMetadata {
 	return SiteMetadata{
-		Root:       "/",
-		ShowFooter: true,
+		Root:        "/",
+		ShowFooter:  true,
+		NavbarLinks: []string{"index.dj"},
 	}
 }
 
@@ -52,7 +53,12 @@ func ReadSiteMetadata(fsys writablefs.FS) SiteMetadata {
 	UnmarshalMetadata(data, &sm)
 
 	// normalize root path to always include leading & trailing slashes
-	sm.Root = fmt.Sprintf("/%s/", strings.Trim(sm.Root, "/"))
+	trimmed := strings.Trim(sm.Root, "/")
+	if trimmed == "" {
+		sm.Root = "/"
+	} else {
+		sm.Root = fmt.Sprintf("/%s/", trimmed)
+	}
 
 	return sm
 }
@@ -124,7 +130,16 @@ func MarshalMetadata(v any) []byte {
 		f := s.Field(i)
 		key := sType.Field(i).Name
 		val := f.Interface()
-		result += fmt.Sprintf("%s: %v\n", key, val)
+
+		var repr string
+		switch f.Type().String() {
+		case "[]string":
+			repr = strings.Join(val.([]string), ", ")
+		default:
+			repr = fmt.Sprintf("%v", val)
+		}
+
+		result += fmt.Sprintf("%s: %s\n", key, repr)
 	}
 
 	return []byte(result)

@@ -165,12 +165,14 @@ func regenerate(fsys writablefs.FS) (site SiteMetadata) {
 	}
 	fmt.Printf("Processed %d articles\n", len(articles))
 
-	fsys.WriteFile(
-		FeedPath,
-		generateFeed(site, articlesInFeed, site.Root+FeedPath),
-	)
-	generatedFiles[FeedPath] = true
-	fmt.Println("Generated", FeedPath)
+	if len(articlesInFeed) > 0 {
+		fsys.WriteFile(
+			FeedPath,
+			generateFeed(site, articlesInFeed, site.Root+FeedPath),
+		)
+		generatedFiles[FeedPath] = true
+		fmt.Println("Generated", FeedPath)
+	}
 
 	DeleteOldGeneratedFiles(fsys, generatedFiles)
 	WriteManifest(fsys, generatedFiles)
