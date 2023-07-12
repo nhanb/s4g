@@ -1,0 +1,21 @@
+html {
+  font-family: serif;
+  max-width: 50rem;
+  margin: auto;
+}
+
+p,
+ul,
+ol {
+  line-height: 1.35rem;
+}
+
+main img {
+  max-width: 100%;
+}
+
+footer {
+  margin-top: 2rem;
+  text-align: right;
+  font-size: 0.8rem;
+}

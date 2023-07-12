@@ -1,0 +1,66 @@
+{{define "head"}}{{end}}
+
+{{define "body"}}
+<header>
+  <h1 class="site-title">{{.Site.Name}}</h1>
+  <p class="tagline">{{.Site.Tagline}}</p>
+</header>
+
+<hr>
+
+<div class="pages">
+  <a href="{{.Site.HomePath}}">Home</a>
+{{- range .ArticlesInNav}}
+  <a href="{{.WebPath}}">{{.Title}}</a>
+{{- end}}
+  <a class="feed-link" href="{{.Feed}}">
+    <img src="{{.Site.HomePath}}_theme/feed.svg" alt="Atom Feed" title="Atom Feed">
+  </a>
+</div>
+
+<hr>
+
+<p>All posts, newest first:</p>
+
+<ul>
+  {{- range .ArticlesInFeed}}
+  {{- if not .IsDraft}}
+  <li>
+    {{.PostedAt.Local.Format "2006-01-02"}} —
+    <a href="{{.WebPath}}">{{.Title}}</a>
+  </li>
+  {{- end}}
+  {{- end}}
+</ul>
+
+<style>
+.site-title {
+  margin-bottom: 0;
+}
+.tagline {
+  margin-top: 0;
+}
+
+.feed-link img {
+  height: 1rem;
+}
+.feed-link {
+  float: right;
+}
+hr {
+  clear: both;
+}
+
+.pages a {
+  margin-right: 0.5rem;
+}
+
+ul {
+  padding: 0;
+  list-style-type: none;
+  /*font-size: 1.1rem;*/
+}
+</style>
+
+{{template "footer" .}}
+{{end}}

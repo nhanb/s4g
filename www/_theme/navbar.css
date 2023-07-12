@@ -1,0 +1,12 @@
+nav > a {
+  margin-right: 0.5rem;
+}
+
+nav > .posted-on {
+  float: right;
+  font-style: italic;
+}
+
+.nav-hr {
+  clear: both;
+}

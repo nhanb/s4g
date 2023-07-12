@@ -1,0 +1,13 @@
+{{- define "head"}}{{- end}}
+
+{{define "body"}}
+
+{{- template "navbar" .}}
+
+<main>
+<h1>{{.Post.Title}}</h1>
+{{.Content}}
+</main>
+
+{{template "footer" .}}
+{{- end}}
