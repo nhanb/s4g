@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -25,21 +26,52 @@ const SiteFileName = "website" + SiteExt
 const FeedPath = "feed.xml"
 
 func main() {
-	var port, folder, new string
-	flag.StringVar(&new, "new", "", "Path for new site to make")
-	flag.StringVar(&port, "port", "3338", "Port for local preview server")
-	flag.StringVar(&folder, "folder", "www", "Web folder")
-	flag.Parse()
-
-	if new != "" {
-		fmt.Println("Making new site at", new)
-		err := makeSite(new, NewSiteMetadata())
-		if err != nil {
-			log.Fatal(err)
-		}
-		return
+	invalidCommand := func() {
+		fmt.Println("Usage: webfolder2000 new|serve [...]")
+		os.Exit(1)
 	}
 
+	// If no subcommand is given, default to "serve"
+	var cmd string
+	var args []string
+	if len(os.Args) < 2 {
+		cmd = "serve"
+		args = os.Args[1:]
+	} else {
+		cmd = os.Args[1]
+		args = os.Args[2:]
+	}
+
+	var newFolder string
+	newCmd := flag.NewFlagSet("new", flag.ExitOnError)
+	newCmd.StringVar(&newFolder, "f", "site1", "Folder for new website")
+
+	var serveFolder, servePort string
+	serveCmd := flag.NewFlagSet("serve", flag.ExitOnError)
+	serveCmd.StringVar(&serveFolder, "f", "www", "Folder for existing website")
+	serveCmd.StringVar(&servePort, "p", "3338", "Port for local preview server")
+
+	switch cmd {
+	case "new":
+		newCmd.Parse(args)
+		handleNewCmd(newFolder)
+	case "serve":
+		serveCmd.Parse(args)
+		handleServeCmd(serveFolder, servePort)
+	default:
+		invalidCommand()
+	}
+}
+
+func handleNewCmd(folder string) {
+	fmt.Println("Making new site at", folder)
+	err := makeSite(folder, NewSiteMetadata())
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func handleServeCmd(folder, port string) {
 	djot.StartService()
 	fmt.Println("Started djot.js service")
 
