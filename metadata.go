@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/fs"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -19,6 +20,7 @@ type SiteMetadata struct {
 	Tagline     string
 	Root        string
 	ShowFooter  bool
+	NavbarLinks []string
 	AuthorName  string
 	AuthorURI   string
 	AuthorEmail string
@@ -30,7 +32,6 @@ type ArticleMetadata struct {
 	PostedAt   time.Time
 	Templates  []string
 	ShowInFeed bool
-	ShowInNav  bool
 }
 
 func NewSiteMetadata() SiteMetadata {
@@ -69,6 +70,13 @@ func UnmarshalMetadata(data []byte, dest any) error {
 			switch f.Type().String() {
 			case "string":
 				s.Field(i).SetString(val)
+
+			case "int":
+				intVal, err := strconv.Atoi(val)
+				if err != nil {
+					return fmt.Errorf("invalid int: %s", val)
+				}
+				s.Field(i).Set(reflect.ValueOf(intVal))
 
 			case "bool":
 				if val != "true" && val != "false" {

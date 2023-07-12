@@ -1,7 +1,6 @@
 {{define "navbar"}}
 <link rel="stylesheet" href="{{.Site.Root}}_theme/navbar.css">
 <nav>
-  <a href="{{.Site.Root}}">Home</a>
   {{- range .ArticlesInNav}}
   <a href="{{.WebPath}}">{{.Title}}</a>
   {{- end}}

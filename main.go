@@ -126,36 +126,37 @@ func regenerate(fsys writablefs.FS) (site SiteMetadata) {
 
 	if len(articles) == 0 {
 		fmt.Println("No articles found.")
-		fsys.RemoveAll("index.html")
 		fsys.RemoveAll(FeedPath)
 		return
 	}
 
 	generatedFiles := make(map[string]bool)
 
-	// Sort articles, newest first
-	sort.Slice(articles, func(i int, j int) bool {
-		return articles[i].PostedAt.Compare(articles[j].PostedAt) > 0
-	})
-
-	var startYear int
-
-	var articlesInNav, articlesInFeed []Article
-	for _, a := range articles {
-		if a.ShowInNav {
-			articlesInNav = append(articlesInNav, a)
+	var articlesInNav []Article
+	for _, link := range site.NavbarLinks {
+		a, ok := articles[link]
+		if !ok {
+			fmt.Printf("NavbarLinks: %s not found\n", link)
+			continue
 		}
+		articlesInNav = append(articlesInNav, a)
+	}
+
+	var articlesInFeed []Article
+	startYear := time.Now().Year()
+	for _, a := range articles {
 		if a.ShowInFeed {
 			articlesInFeed = append(articlesInFeed, a)
 		}
-		if !a.PostedAt.IsZero() {
+		if !a.PostedAt.IsZero() && a.PostedAt.Year() < startYear {
 			startYear = a.PostedAt.Year()
 		}
 	}
 
-	if startYear == 0 {
-		startYear = time.Now().Year()
-	}
+	// Sort articles in feed, newest first
+	sort.Slice(articlesInFeed, func(i int, j int) bool {
+		return articlesInFeed[i].PostedAt.Compare(articlesInFeed[j].PostedAt) > 0
+	})
 
 	for _, a := range articles {
 		fmt.Println(">", a.Path, "-", a.Title)
@@ -267,46 +268,8 @@ func (a *Article) WriteHtmlFile(
 	}
 }
 
-func WriteHomePage(
-	fsys writablefs.FS,
-	site SiteMetadata,
-	articlesInFeed, articlesInNav []Article,
-	startYear int,
-) {
-	var buf bytes.Buffer
-	tmpl := template.Must(
-		template.ParseFS(
-			fsys,
-			"_theme/base.tmpl",
-			"_theme/includes.tmpl",
-			"_theme/home.tmpl",
-		),
-	)
-	err := tmpl.Execute(&buf, struct {
-		Site           *SiteMetadata
-		Title          string
-		ArticlesInFeed []Article
-		ArticlesInNav  []Article
-		Feed           string
-		Now            time.Time
-		StartYear      int
-	}{
-		Site:           &site,
-		Title:          fmt.Sprintf("%s - %s", site.Name, site.Tagline),
-		ArticlesInFeed: articlesInFeed,
-		ArticlesInNav:  articlesInNav,
-		Feed:           site.Root + FeedPath,
-		Now:            time.Now(),
-		StartYear:      startYear,
-	})
-	if err != nil {
-		fmt.Println("Error in WriteHtmlFile:", err)
-		return
-	}
-	fsys.WriteFile("index.html", buf.Bytes())
-}
-
-func findArticles(fsys writablefs.FS, site SiteMetadata) (result []Article) {
+func findArticles(fsys writablefs.FS, site SiteMetadata) map[string]Article {
+	result := make(map[string]Article)
 
 	fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() || !strings.HasSuffix(d.Name(), DjotExt) {
@@ -332,7 +295,6 @@ func findArticles(fsys writablefs.FS, site SiteMetadata) (result []Article) {
 				"$_theme/post.tmpl",
 			},
 			ShowInFeed: true,
-			ShowInNav:  false,
 		}
 		err = UnmarshalMetadata(metaText, &meta)
 		if err != nil {
@@ -348,8 +310,8 @@ func findArticles(fsys writablefs.FS, site SiteMetadata) (result []Article) {
 			ArticleMetadata: meta,
 		}
 		article.ComputeWebPath(site.Root)
-		result = append(result, article)
+		result[article.Path] = article
 		return nil
 	})
-	return
+	return result
 }
