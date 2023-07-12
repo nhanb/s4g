@@ -94,7 +94,7 @@ func Middleware(fsys writablefs.FS, f http.Handler) http.Handler {
 
 		originalContent, err := fs.ReadFile(fsys, path)
 		if err != nil {
-			http.NotFound(w, r)
+			f.ServeHTTP(w, r)
 			return
 		}
 
