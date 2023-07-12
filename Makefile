@@ -6,7 +6,7 @@ watch:
 	| entr -rc go run .
 
 watch-theme:
-	find theme/* | entr -c rsync -av theme/ www/_theme/
+	find theme/* | entr -c rsync -av theme/ docs/_theme/
 
 # Cheating a little because the djot.js repo on github does not provide builds
 update-djot:
