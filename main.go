@@ -82,7 +82,7 @@ func handleServeCmd(folder, port string) {
 
 	fsys := writablefs.WriteDirFS(absolutePath)
 
-	regenerate(fsys)
+	site := regenerate(fsys)
 
 	// TODO: only rebuild necessary bits instead of regenerating
 	// the whole thing. To do that I'll probably need to:
@@ -98,18 +98,25 @@ func handleServeCmd(folder, port string) {
 	})
 	defer closeWatcher()
 
-	println("Serving local website at http://localhost:" + port)
-	http.Handle("/", livereload.Middleware(fsys, http.FileServer(http.FS(fsys))))
+	println("Serving local website at http://localhost:" + port + site.Root)
+	http.Handle(
+		site.Root,
+		livereload.Middleware(
+			site.Root,
+			fsys,
+			http.StripPrefix(site.Root, http.FileServer(http.FS(fsys))),
+		),
+	)
 	err = http.ListenAndServe("127.0.0.1:"+port, nil)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func regenerate(fsys writablefs.FS) {
+func regenerate(fsys writablefs.FS) (site SiteMetadata) {
 	defer timer("Took %s")()
 
-	site := ReadSiteMetadata(fsys)
+	site = ReadSiteMetadata(fsys)
 	articles := findArticles(fsys)
 
 	if len(articles) == 0 {
@@ -160,13 +167,15 @@ func regenerate(fsys writablefs.FS) {
 
 	fsys.WriteFile(
 		FeedPath,
-		generateFeed(site, articlesInFeed, site.HomePath+FeedPath),
+		generateFeed(site, articlesInFeed, site.Root+FeedPath),
 	)
 	generatedFiles[FeedPath] = true
 	fmt.Println("Generated", FeedPath)
 
 	DeleteOldGeneratedFiles(fsys, generatedFiles)
 	WriteManifest(fsys, generatedFiles)
+
+	return
 }
 
 type Article struct {
@@ -243,7 +252,7 @@ func (a *Article) WriteHtmlFile(
 		Title:         fmt.Sprintf("%s | %s", a.Title, site.Name),
 		Post:          a,
 		ArticlesInNav: articlesInNav,
-		Feed:          site.HomePath + FeedPath,
+		Feed:          site.Root + FeedPath,
 		Now:           time.Now(),
 		StartYear:     startYear,
 	})
@@ -288,7 +297,7 @@ func WriteHomePage(
 		Title:          fmt.Sprintf("%s - %s", site.Name, site.Tagline),
 		ArticlesInFeed: articlesInFeed,
 		ArticlesInNav:  articlesInNav,
-		Feed:           site.HomePath + FeedPath,
+		Feed:           site.Root + FeedPath,
 		Now:            time.Now(),
 		StartYear:      startYear,
 	})

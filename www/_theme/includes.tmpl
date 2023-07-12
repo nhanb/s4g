@@ -1,9 +1,9 @@
 {{define "navbar"}}
-<link rel="stylesheet" href="{{.Site.HomePath}}_theme/navbar.css">
+<link rel="stylesheet" href="{{.Site.Root}}_theme/navbar.css">
 <nav>
-  <a href="{{.Site.HomePath}}">Home</a>
+  <a href="{{.Site.Root}}">Home</a>
   {{- range .ArticlesInNav}}
-  <a href="{{$.Site.HomePath}}{{.WebPath}}">{{.Title}}</a>
+  <a href="{{$.Site.Root}}{{.WebPath}}">{{.Title}}</a>
   {{- end}}
 
   {{- if not .Post.PostedAt.IsZero}}

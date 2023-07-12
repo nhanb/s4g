@@ -1,7 +1,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>CoolZone</title>
   <id>https://coolzone.example.com/</id>
-  <link rel="self" href="/feed.xml"></link>
+  <link rel="self" href="/webmaker2000/feed.xml"></link>
   <updated>2023-04-05T00:00:00+07:00</updated>
   <author>
     <name>Coolio McCool</name>

@@ -17,7 +17,7 @@ type SiteMetadata struct {
 	Address      string
 	Name         string
 	Tagline      string
-	HomePath     string
+	Root         string
 	ShowFooter   bool
 	GenerateHome bool
 	AuthorName   string
@@ -36,7 +36,7 @@ type ArticleMetadata struct {
 
 func NewSiteMetadata() SiteMetadata {
 	return SiteMetadata{
-		HomePath:     "/",
+		Root:         "/",
 		ShowFooter:   true,
 		GenerateHome: true,
 	}
@@ -51,6 +51,10 @@ func ReadSiteMetadata(fsys writablefs.FS) SiteMetadata {
 	}
 
 	UnmarshalMetadata(data, &sm)
+
+	// normalize root path to always include leading & trailing slashes
+	sm.Root = fmt.Sprintf("/%s/", strings.Trim(sm.Root, "/"))
+
 	return sm
 }
 

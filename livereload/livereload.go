@@ -43,41 +43,43 @@ func init() {
 	)
 }
 
+func handleFunc(w http.ResponseWriter, r *http.Request) {
+	clientId := r.Header.Get(clientIdHeader)
+	state.mut.RLock()
+	shouldReload, ok := state.clients[clientId]
+	state.mut.RUnlock()
+
+	// New client: add client to state, don't reload
+	if !ok {
+		//fmt.Println("New livereload client:", clientId)
+		state.mut.Lock()
+		state.clients[clientId] = false
+		state.mut.Unlock()
+		w.Write(dontReload)
+		return
+	}
+
+	// Existing client:
+	if shouldReload {
+		w.Write(pleaseReload)
+		// On reload, the browser tab will generate another client ID,
+		// so we can safely delete the old client ID now:
+		state.mut.Lock()
+		delete(state.clients, clientId)
+		state.mut.Unlock()
+	} else {
+		w.Write(dontReload)
+	}
+}
+
 // For html pages, insert a script tag to enable livereload
-func Middleware(fsys writablefs.FS, f http.Handler) http.Handler {
+func Middleware(root string, fsys writablefs.FS, f http.Handler) http.Handler {
+
+	// Handle AJAX endpoint
+	http.HandleFunc(endpoint, handleFunc)
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
-
-		// Handle AJAX endpoint
-		if path == endpoint {
-			clientId := r.Header.Get(clientIdHeader)
-			state.mut.RLock()
-			shouldReload, ok := state.clients[clientId]
-			state.mut.RUnlock()
-
-			// New client: add client to state, don't reload
-			if !ok {
-				//fmt.Println("New livereload client:", clientId)
-				state.mut.Lock()
-				state.clients[clientId] = false
-				state.mut.Unlock()
-				w.Write(dontReload)
-				return
-			}
-
-			// Existing client:
-			if shouldReload {
-				w.Write(pleaseReload)
-				// On reload, the browser tab will generate another client ID,
-				// so we can safely delete the old client ID now:
-				state.mut.Lock()
-				delete(state.clients, clientId)
-				state.mut.Unlock()
-			} else {
-				w.Write(dontReload)
-			}
-			return
-		}
 
 		// For non-html requests, fall through to default FileServer handler
 		if !strings.HasSuffix(path, ".html") && !strings.HasSuffix(path, "/") {
@@ -85,14 +87,15 @@ func Middleware(fsys writablefs.FS, f http.Handler) http.Handler {
 			return
 		}
 
-		if strings.HasSuffix(path, "/") {
-			path += "index.html"
+		filePath := path
+
+		if strings.HasSuffix(filePath, "/") {
+			filePath += "index.html"
 		}
 
-		// Filesystem access doesn't expect leading slash "/"
-		path = strings.TrimPrefix(path, "/")
+		filePath = strings.TrimPrefix(filePath, root)
 
-		originalContent, err := fs.ReadFile(fsys, path)
+		originalContent, err := fs.ReadFile(fsys, filePath)
 		if err != nil {
 			f.ServeHTTP(w, r)
 			return
@@ -102,6 +105,7 @@ func Middleware(fsys writablefs.FS, f http.Handler) http.Handler {
 	})
 }
 
+// Tell current browser tabs to reload
 func Trigger() {
 	state.mut.Lock()
 	defer state.mut.Unlock()
