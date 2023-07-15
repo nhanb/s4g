@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"flag"
 	"fmt"
 	"html/template"
@@ -13,6 +14,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"go.imnhan.com/webmaker2000/djot"
@@ -81,8 +83,34 @@ func handleServeCmd(folder, port string) {
 	}
 
 	fsys := writablefs.WriteDirFS(absolutePath)
+	site, err := ReadSiteMetadata(fsys)
+	if err != nil {
+		panic(err)
+	}
 
-	site := regenerate(fsys)
+	webRootUpdates := make(chan string)
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func(webRoot string) {
+		defer wg.Done()
+
+		srv := runServer(fsys, webRoot, port)
+
+		for {
+			newRoot := <-webRootUpdates
+			if newRoot == webRoot {
+				continue
+			}
+			fmt.Println("Root changed => restarting server")
+			webRoot = newRoot
+			err := srv.Shutdown(context.TODO())
+			if err != nil {
+				panic(err)
+			}
+			srv = runServer(fsys, webRoot, port)
+		}
+	}(site.Root)
 
 	// TODO: only rebuild necessary bits instead of regenerating
 	// the whole thing. To do that I'll probably need to:
@@ -93,35 +121,61 @@ func handleServeCmd(folder, port string) {
 	// directory.
 	closeWatcher := WatchLocalFS(fsys, func() {
 		fmt.Println("Change detected. Regenerating...")
-		regenerate(fsys)
-		livereload.Trigger()
+		newSite, err := regenerate(fsys)
+		livereload.SetError(err)
+		if err == nil {
+			fmt.Println("Sending", newSite.Root)
+			webRootUpdates <- newSite.Root
+			fmt.Println("Done", newSite.Root)
+		}
 	})
 	defer closeWatcher()
 
-	println("Serving local website at http://localhost:" + port + site.Root)
-	http.Handle(
-		site.Root,
+	site, err = regenerate(fsys)
+	livereload.SetError(err)
+
+	wg.Wait()
+}
+
+// Non-blocking. Returns srv handle to allow calling Shutdown() later.
+func runServer(fsys writablefs.FS, webRoot string, port string) *http.Server {
+	println("Serving local website at http://localhost:" + port + webRoot)
+	mux := http.NewServeMux()
+	mux.Handle(
+		webRoot,
 		livereload.Middleware(
-			site.Root,
+			mux,
+			webRoot,
 			fsys,
-			http.StripPrefix(site.Root, http.FileServer(http.FS(fsys))),
+			http.StripPrefix(webRoot, http.FileServer(http.FS(fsys))),
 		),
 	)
 
-	if site.Root != "/" {
-		http.Handle("/", http.RedirectHandler(site.Root, http.StatusTemporaryRedirect))
+	if webRoot != "/" {
+		mux.Handle("/", http.RedirectHandler(webRoot, http.StatusTemporaryRedirect))
 	}
 
-	err = http.ListenAndServe("127.0.0.1:"+port, nil)
-	if err != nil {
-		panic(err)
+	srv := &http.Server{
+		Addr:    "127.0.0.1:" + port,
+		Handler: mux,
 	}
+
+	go func() {
+		srv.ListenAndServe()
+	}()
+
+	return srv
 }
 
-func regenerate(fsys writablefs.FS) (site SiteMetadata) {
+func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 	defer timer("Took %s")()
 
-	site = ReadSiteMetadata(fsys)
+	site, err = ReadSiteMetadata(fsys)
+	if err != nil {
+		livereload.SetError(err)
+		return nil, err
+	}
+
 	articles := findArticles(fsys, site)
 
 	if len(articles) == 0 {
@@ -136,8 +190,8 @@ func regenerate(fsys writablefs.FS) (site SiteMetadata) {
 	for _, link := range site.NavbarLinks {
 		a, ok := articles[link]
 		if !ok {
-			fmt.Printf("NavbarLinks: %s not found\n", link)
-			continue
+			return nil,
+				fmt.Errorf("%s: NavbarLinks: %s not found", FeedPath, link)
 		}
 		articlesInNav = append(articlesInNav, a)
 	}
@@ -160,7 +214,7 @@ func regenerate(fsys writablefs.FS) (site SiteMetadata) {
 
 	for _, a := range articles {
 		fmt.Println(">", a.Path, "-", a.Title)
-		a.WriteHtmlFile(&site, articlesInNav, articlesInFeed, startYear)
+		a.WriteHtmlFile(site, articlesInNav, articlesInFeed, startYear)
 		generatedFiles[a.OutputPath] = true
 	}
 	fmt.Printf("Processed %d articles\n", len(articles))
@@ -270,7 +324,7 @@ func (a *Article) WriteHtmlFile(
 	}
 }
 
-func findArticles(fsys writablefs.FS, site SiteMetadata) map[string]Article {
+func findArticles(fsys writablefs.FS, site *SiteMetadata) map[string]Article {
 	result := make(map[string]Article)
 
 	fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {

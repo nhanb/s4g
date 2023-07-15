@@ -42,12 +42,12 @@ func NewSiteMetadata() SiteMetadata {
 	}
 }
 
-func ReadSiteMetadata(fsys writablefs.FS) SiteMetadata {
+func ReadSiteMetadata(fsys writablefs.FS) (*SiteMetadata, error) {
 	sm := NewSiteMetadata()
 
 	data, err := fs.ReadFile(fsys, SiteFileName)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("ReadSiteMetadata: %w", err)
 	}
 
 	UnmarshalMetadata(data, &sm)
@@ -60,7 +60,7 @@ func ReadSiteMetadata(fsys writablefs.FS) SiteMetadata {
 		sm.Root = fmt.Sprintf("/%s/", trimmed)
 	}
 
-	return sm
+	return &sm, nil
 }
 
 // Similar API to json.Unmarshal but supports neither struct tags nor nesting.
