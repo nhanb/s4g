@@ -187,11 +187,16 @@ type Article struct {
 	DjotBody   []byte
 	ArticleMetadata
 	WebPath       string
-	templatePaths []string
+	TemplatePaths []string
 }
 
-func (a *Article) ComputeWebPath(root string) {
-	webPath := root + a.OutputPath
+func (a *Article) ComputeDerivedFields(root string) {
+	a.WebPath = computeWebPath(root, a.OutputPath)
+	a.TemplatePaths = computeTemplatePaths(a.Path, a.Templates)
+}
+
+func computeWebPath(root string, outputPath string) string {
+	webPath := root + outputPath
 	if strings.HasSuffix(webPath, "/index.html") {
 		webPath = strings.TrimSuffix(webPath, "index.html")
 	}
@@ -202,24 +207,19 @@ func (a *Article) ComputeWebPath(root string) {
 		escaped[i] = url.PathEscape(parts[i])
 	}
 
-	a.WebPath = strings.Join(escaped, "/")
+	return strings.Join(escaped, "/")
 }
 
-func (a *Article) TemplatePaths() []string {
-	if len(a.templatePaths) > 0 {
-		return a.templatePaths
-	}
-	paths := make([]string, len(a.Templates))
+func computeTemplatePaths(articlePath string, templates []string) []string {
+	paths := make([]string, len(templates))
 	for i := 0; i < len(paths); i++ {
-		p := a.Templates[i]
+		p := templates[i]
 		if strings.HasPrefix(p, "$") {
 			paths[i] = strings.TrimPrefix(p, "$")
 		} else {
-			paths[i] = filepath.Join(filepath.Dir(a.Path), p)
+			paths[i] = filepath.Join(filepath.Dir(articlePath), p)
 		}
 	}
-
-	a.templatePaths = paths
 	return paths
 }
 
@@ -235,7 +235,7 @@ func (a *Article) WriteHtmlFile(
 	// Then insert that content into the main template
 	var buf bytes.Buffer
 	// TODO: should probably reuse the template object for common cases
-	tmpl := template.Must(template.ParseFS(a.Fs, a.TemplatePaths()...))
+	tmpl := template.Must(template.ParseFS(a.Fs, a.TemplatePaths...))
 	err := tmpl.Execute(&buf, struct {
 		Site           *SiteMetadata
 		Content        template.HTML
@@ -311,7 +311,7 @@ func findArticles(fsys writablefs.FS, site SiteMetadata) map[string]Article {
 			DjotBody:        bodyText,
 			ArticleMetadata: meta,
 		}
-		article.ComputeWebPath(site.Root)
+		article.ComputeDerivedFields(site.Root)
 		result[article.Path] = article
 		return nil
 	})
