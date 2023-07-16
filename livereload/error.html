@@ -1,15 +1,15 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Error</title>
+    <title>{{.Error}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
   <body>
-    <b>Error:</b> {{.}}
+    <h1>Error</h1>
+    {{.Html}}
     <style>
-      body {
-        background-color: pink;
+      h1 {
         color: red;
       }
     </style>

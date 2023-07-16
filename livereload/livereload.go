@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strings"
 	"sync"
-	"text/template"
 
 	"go.imnhan.com/webmaker2000/writablefs"
 )
@@ -17,9 +16,6 @@ const clientIdHeader = "Client-Id"
 
 //go:embed livereload.html
 var lrScript []byte
-
-//go:embed error.html
-var errorTmpl string
 
 var pleaseReload = []byte("1")
 var dontReload = []byte("0")
@@ -90,7 +86,7 @@ func Middleware(mux *http.ServeMux, root string, fsys writablefs.FS, f http.Hand
 		err = state.err
 		state.errMut.RUnlock()
 		if err != nil {
-			serveError(w, r, err)
+			serveError(w, r, err.(htmlErr))
 			return
 		}
 
@@ -151,13 +147,4 @@ func withLiveReload(original []byte) []byte {
 	copy(result[bodyEndPos:], lrScript)
 	copy(result[bodyEndPos+len(lrScript):], original[bodyEndPos:])
 	return result
-}
-
-var errTmpl = template.Must(template.New("error").Parse(errorTmpl))
-
-func serveError(w http.ResponseWriter, r *http.Request, err error) {
-	var buf bytes.Buffer
-	errTmpl.Execute(&buf, err.Error())
-	body := withLiveReload(buf.Bytes())
-	w.Write(body)
 }

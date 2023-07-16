@@ -2,8 +2,7 @@ build:
 	go build -o dist/
 
 watch:
-	find . -name '*.go' -or -name '*.js' -or -name 'livereload.html' \
-	| entr -rc go run .
+	fd -E docs -E theme | entr -rc go run .
 
 watch-theme:
 	find theme/* | entr -c rsync -av theme/ docs/_theme/

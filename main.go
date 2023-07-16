@@ -190,8 +190,10 @@ func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 	for _, link := range site.NavbarLinks {
 		a, ok := articles[link]
 		if !ok {
-			return nil,
-				fmt.Errorf("%s: NavbarLinks: %s not found", FeedPath, link)
+			return nil, &SiteMetadataErr{
+				Field: "NavbarLinks",
+				Msg:   fmt.Sprintf(`"%s" does not exist`, link),
+			}
 		}
 		articlesInNav = append(articlesInNav, a)
 	}
@@ -214,7 +216,10 @@ func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 
 	for _, a := range articles {
 		fmt.Println(">", a.Path, "-", a.Title)
-		a.WriteHtmlFile(site, articlesInNav, articlesInFeed, startYear)
+		err := a.WriteHtmlFile(site, articlesInNav, articlesInFeed, startYear)
+		if err != nil {
+			return nil, fmt.Errorf("Article %s: %w", a.Path, err)
+		}
 		generatedFiles[a.OutputPath] = true
 	}
 	fmt.Printf("Processed %d articles\n", len(articles))
@@ -282,15 +287,19 @@ func (a *Article) WriteHtmlFile(
 	articlesInNav []Article,
 	articlesInFeed []Article,
 	startYear int,
-) {
-	// First generate the main content in html
+) error {
 	contentHtml := djot.ToHtml(a.DjotBody)
 
-	// Then insert that content into the main template
-	var buf bytes.Buffer
+	tmpl, err := template.ParseFS(a.Fs, a.TemplatePaths...)
 	// TODO: should probably reuse the template object for common cases
-	tmpl := template.Must(template.ParseFS(a.Fs, a.TemplatePaths...))
-	err := tmpl.Execute(&buf, struct {
+	if err != nil {
+		return fmt.Errorf(
+			"Failed to parse templates (%v): %w", a.Templates, err,
+		)
+	}
+
+	var buf bytes.Buffer
+	err = tmpl.Execute(&buf, struct {
 		Site           *SiteMetadata
 		Content        template.HTML
 		Title          string
@@ -312,16 +321,17 @@ func (a *Article) WriteHtmlFile(
 		StartYear:      startYear,
 	})
 	if err != nil {
-		fmt.Println("Error in WriteHtmlFile:", err)
-		return
+		return fmt.Errorf("Failed to execute templates (%v): %w", a.Templates, err)
 	}
 	fullHtml := buf.Bytes()
 
 	// Now write into an html with the same name as the original djot file
 	err = a.Fs.WriteFile(a.OutputPath, fullHtml)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("Failed to write to %s: %w", a.OutputPath, err)
 	}
+
+	return nil
 }
 
 func findArticles(fsys writablefs.FS, site *SiteMetadata) map[string]Article {
