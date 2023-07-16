@@ -18,9 +18,21 @@ type htmlErr interface {
 	Html() template.HTML
 }
 
-func serveError(w http.ResponseWriter, r *http.Request, err htmlErr) {
+func serveError(w http.ResponseWriter, r *http.Request, err error) {
 	var buf bytes.Buffer
-	errTmpl.Execute(&buf, err)
+	_, ok := err.(htmlErr)
+	if ok {
+		errTmpl.Execute(&buf, err)
+	} else {
+		// Shim for errors that don't support HTML output
+		errTmpl.Execute(&buf, struct {
+			Error string
+			Html  template.HTML
+		}{
+			Error: err.Error(),
+			Html:  template.HTML(err.Error()),
+		})
+	}
 	body := withLiveReload(buf.Bytes())
 	w.Write(body)
 }

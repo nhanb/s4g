@@ -86,7 +86,7 @@ func Middleware(mux *http.ServeMux, root string, fsys writablefs.FS, f http.Hand
 		err = state.err
 		state.errMut.RUnlock()
 		if err != nil {
-			serveError(w, r, err.(htmlErr))
+			serveError(w, r, err)
 			return
 		}
 
