@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"go.imnhan.com/webmaker2000/djot"
+	"go.imnhan.com/webmaker2000/gui"
 	"go.imnhan.com/webmaker2000/livereload"
 	"go.imnhan.com/webmaker2000/writablefs"
 )
@@ -37,7 +38,7 @@ func main() {
 	var cmd string
 	var args []string
 	if len(os.Args) < 2 {
-		cmd = "serve"
+		cmd = "gui"
 		args = os.Args[1:]
 	} else {
 		cmd = os.Args[1]
@@ -60,6 +61,8 @@ func main() {
 	case "serve":
 		serveCmd.Parse(args)
 		handleServeCmd(serveFolder, servePort)
+	case "gui":
+		handleGuiCmd()
 	default:
 		invalidCommand()
 	}
@@ -70,6 +73,22 @@ func handleNewCmd(folder string) {
 	err := makeSite(folder, NewSiteMetadata())
 	if err != nil {
 		log.Fatal(err)
+	}
+}
+
+func handleGuiCmd() {
+	task, path, ok := gui.ChooseTask(gui.DefaultTclPath)
+	if !ok {
+		return
+	}
+
+	switch task {
+	case gui.TaskOpen:
+		fmt.Println(task, path)
+	case gui.TaskCreate:
+		fmt.Println(task, path)
+	default:
+		panic(task)
 	}
 }
 
