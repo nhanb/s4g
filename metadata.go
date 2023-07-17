@@ -71,7 +71,8 @@ func UnmarshalMetadata(data []byte, dest any) error {
 	sType := s.Type()
 	for i := 0; i < s.NumField(); i++ {
 		f := s.Field(i)
-		val, ok := m[sType.Field(i).Name]
+		fieldName := sType.Field(i).Name
+		val, ok := m[fieldName]
 		if ok {
 			switch f.Type().String() {
 			case "string":
@@ -80,15 +81,22 @@ func UnmarshalMetadata(data []byte, dest any) error {
 			case "int":
 				intVal, err := strconv.Atoi(val)
 				if err != nil {
-					return fmt.Errorf("invalid int: %s", val)
+					return &UserFileErr{
+						Field: fieldName,
+						Msg:   fmt.Sprintf(`invalid int: "%s"`, err),
+					}
 				}
 				s.Field(i).Set(reflect.ValueOf(intVal))
 
 			case "bool":
 				if val != "true" && val != "false" {
-					return fmt.Errorf(
-						"invalid boolean: expected true/false, got %s", val,
-					)
+					return &UserFileErr{
+						Field: fieldName,
+						Msg: fmt.Sprintf(
+							`invalid boolean: expected true/false, got "%s"`,
+							val,
+						),
+					}
 				}
 				s.Field(i).SetBool(val == "true")
 
@@ -96,9 +104,12 @@ func UnmarshalMetadata(data []byte, dest any) error {
 				tVal, err := time.ParseInLocation("2006-01-02", val, time.Local)
 				tVal = tVal.Local()
 				if err != nil {
-					return fmt.Errorf(
-						"invalid date: expected YYYY-MM-DD, got %s", val,
-					)
+					return &UserFileErr{
+						Field: fieldName,
+						Msg: fmt.Sprintf(
+							`invalid date: expected YYYY-MM-DD, got "%s"`, val,
+						),
+					}
 				}
 				s.Field(i).Set(reflect.ValueOf(tVal))
 
@@ -112,7 +123,7 @@ func UnmarshalMetadata(data []byte, dest any) error {
 
 			default:
 				panic(fmt.Sprintf(
-					"unsupported metadata field type: %s",
+					`unsupported metadata field type: "%s"`,
 					f.Type().String(),
 				))
 			}

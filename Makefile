@@ -2,7 +2,7 @@ build:
 	go build -o dist/
 
 watch:
-	fd -E docs -E theme | entr -rc go run .
+	fd -E docs -E theme | entr -rc go run . serve
 
 watch-theme:
 	find theme/* | entr -c rsync -av theme/ docs/_theme/

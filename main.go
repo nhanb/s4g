@@ -193,7 +193,10 @@ func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 		return nil, err
 	}
 
-	articles := findArticles(fsys, site)
+	articles, err := findArticles(fsys, site)
+	if err != nil {
+		return nil, err
+	}
 
 	if len(articles) == 0 {
 		fmt.Println("No articles found.")
@@ -207,7 +210,8 @@ func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 	for _, link := range site.NavbarLinks {
 		a, ok := articles[link]
 		if !ok {
-			return nil, &SiteMetadataErr{
+			return nil, &UserFileErr{
+				File:  SiteFileName,
 				Field: "NavbarLinks",
 				Msg:   fmt.Sprintf(`"%s" does not exist`, link),
 			}
@@ -351,10 +355,10 @@ func (a *Article) WriteHtmlFile(
 	return nil
 }
 
-func findArticles(fsys writablefs.FS, site *SiteMetadata) map[string]Article {
+func findArticles(fsys writablefs.FS, site *SiteMetadata) (map[string]Article, error) {
 	result := make(map[string]Article)
 
-	fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
+	err := fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() || !strings.HasSuffix(d.Name(), DjotExt) {
 			return nil
 		}
@@ -381,8 +385,7 @@ func findArticles(fsys writablefs.FS, site *SiteMetadata) map[string]Article {
 		}
 		err = UnmarshalMetadata(metaText, &meta)
 		if err != nil {
-			fmt.Printf("FIXME: Malformed article metadata in %s: %s\n", path, err)
-			return nil
+			return err
 		}
 
 		article := Article{
@@ -396,5 +399,9 @@ func findArticles(fsys writablefs.FS, site *SiteMetadata) map[string]Article {
 		result[article.Path] = article
 		return nil
 	})
-	return result
+
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
