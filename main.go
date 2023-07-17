@@ -129,7 +129,7 @@ func handleServeCmd(folder, port string) {
 	})
 	defer closeWatcher()
 
-	site, err = regenerate(fsys)
+	_, err = regenerate(fsys)
 	livereload.SetError(err)
 
 	wg.Wait()
