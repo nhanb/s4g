@@ -124,9 +124,7 @@ func handleServeCmd(folder, port string) {
 		newSite, err := regenerate(fsys)
 		livereload.SetError(err)
 		if err == nil {
-			fmt.Println("Sending", newSite.Root)
 			webRootUpdates <- newSite.Root
-			fmt.Println("Done", newSite.Root)
 		}
 	})
 	defer closeWatcher()
