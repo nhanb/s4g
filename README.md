@@ -19,7 +19,7 @@ Quality-of-life features are not neglected:
 
 - [x] Livereload with no browser plugin (works but currently polls which is
   noisy, should probably upgrade to websockets)
-- [ ] Shows user error messages on the livereloaded web page
+- [x] Shows user error messages on the livereloaded web page
 - [ ] Just enough GUI so user doesn't have to touch a terminal
 - [ ] 1-click deploy to popular static hosting targets (git push, rsync, etc.)
 

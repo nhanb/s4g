@@ -3,8 +3,11 @@ package livereload
 import (
 	"bytes"
 	_ "embed"
+	"errors"
 	"html/template"
 	"net/http"
+
+	"go.imnhan.com/webmaker2000/errs"
 )
 
 //go:embed error.html
@@ -12,26 +15,27 @@ var errorTmpl string
 
 var errTmpl = template.Must(template.New("error").Parse(errorTmpl))
 
-// Error that has a user-friendly HTML representation.
-type htmlErr interface {
-	error
-	Html() template.HTML
+type errTmplInput struct {
+	Text string
+	Html template.HTML
 }
 
-func serveError(w http.ResponseWriter, r *http.Request, err error) {
+func serveError(w http.ResponseWriter, r *http.Request, e error) {
 	var buf bytes.Buffer
-	_, ok := err.(htmlErr)
+	var uerr *errs.UserFileErr
+	ok := errors.As(e, &uerr)
+
+	var tmplInput errTmplInput
 	if ok {
-		errTmpl.Execute(&buf, err)
+		tmplInput.Text = uerr.Error()
+		tmplInput.Html = uerr.Html()
 	} else {
-		// Shim for errors that don't support HTML output
-		errTmpl.Execute(&buf, struct {
-			Error string
-			Html  template.HTML
-		}{
-			Error: err.Error(),
-			Html:  template.HTML(err.Error()),
-		})
+		tmplInput.Text = e.Error()
+		tmplInput.Html = template.HTML(e.Error())
+	}
+	err := errTmpl.Execute(&buf, tmplInput)
+	if err != nil {
+		panic(err)
 	}
 	body := withLiveReload(buf.Bytes())
 	w.Write(body)

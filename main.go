@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"go.imnhan.com/webmaker2000/djot"
+	"go.imnhan.com/webmaker2000/errs"
 	"go.imnhan.com/webmaker2000/gui"
 	"go.imnhan.com/webmaker2000/livereload"
 	"go.imnhan.com/webmaker2000/writablefs"
@@ -30,7 +31,7 @@ const FeedPath = "feed.xml"
 
 func main() {
 	invalidCommand := func() {
-		fmt.Println("Usage: webfolder2000 new|serve [...]")
+		fmt.Println("Usage: webfolder2000 new|serve|gui [...]")
 		os.Exit(1)
 	}
 
@@ -210,7 +211,7 @@ func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 	for _, link := range site.NavbarLinks {
 		a, ok := articles[link]
 		if !ok {
-			return nil, &UserFileErr{
+			return nil, &errs.UserFileErr{
 				File:  SiteFileName,
 				Field: "NavbarLinks",
 				Msg:   fmt.Sprintf(`"%s" does not exist`, link),
@@ -383,9 +384,10 @@ func findArticles(fsys writablefs.FS, site *SiteMetadata) (map[string]Article, e
 			},
 			ShowInFeed: true,
 		}
-		err = UnmarshalMetadata(metaText, &meta)
-		if err != nil {
-			return err
+		userErr := UnmarshalMetadata(metaText, &meta)
+		if userErr != nil {
+			userErr.File = path
+			return fmt.Errorf("findArticles failed to unmarshall metadata: %w", userErr)
 		}
 
 		article := Article{
