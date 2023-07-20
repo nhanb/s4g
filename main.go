@@ -211,7 +211,7 @@ func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 	for _, link := range site.NavbarLinks {
 		a, ok := articles[link]
 		if !ok {
-			return nil, &errs.UserFileErr{
+			return nil, &errs.UserErr{
 				File:  SiteFileName,
 				Field: "NavbarLinks",
 				Msg:   fmt.Sprintf(`"%s" does not exist`, link),

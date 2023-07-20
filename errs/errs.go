@@ -7,7 +7,7 @@ import (
 
 // Represents a user input error, which in webmaker2000's case is almost
 // always some malformed file.
-type UserFileErr struct {
+type UserErr struct {
 	File string
 	Msg  string
 
@@ -21,14 +21,14 @@ type UserFileErr struct {
 	Field string
 }
 
-func (e *UserFileErr) Error() string {
+func (e *UserErr) Error() string {
 	return fmt.Sprintf(
 		"UserFileErr: %s - %d:%d:%s %s",
 		e.File, e.Line, e.Column, e.Field, e.Msg,
 	)
 }
 
-func (e *UserFileErr) Html() template.HTML {
+func (e *UserErr) Html() template.HTML {
 	content := fmt.Sprintf("In file <b>%s</b>", e.File)
 	if e.Line != 0 {
 		content += fmt.Sprintf(", line %d", e.Line)

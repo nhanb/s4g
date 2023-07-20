@@ -65,7 +65,7 @@ func ReadSiteMetadata(fsys writablefs.FS) (*SiteMetadata, error) {
 }
 
 // Similar API to json.Unmarshal but supports neither struct tags nor nesting.
-func UnmarshalMetadata(data []byte, dest any) *errs.UserFileErr {
+func UnmarshalMetadata(data []byte, dest any) *errs.UserErr {
 	m := metaTextToMap(data)
 
 	s := reflect.ValueOf(dest).Elem()
@@ -82,7 +82,7 @@ func UnmarshalMetadata(data []byte, dest any) *errs.UserFileErr {
 			case "int":
 				intVal, err := strconv.Atoi(val)
 				if err != nil {
-					return &errs.UserFileErr{
+					return &errs.UserErr{
 						Field: fieldName,
 						Msg:   fmt.Sprintf(`invalid int: "%s"`, err),
 					}
@@ -91,7 +91,7 @@ func UnmarshalMetadata(data []byte, dest any) *errs.UserFileErr {
 
 			case "bool":
 				if val != "true" && val != "false" {
-					return &errs.UserFileErr{
+					return &errs.UserErr{
 						Field: fieldName,
 						Msg: fmt.Sprintf(
 							`invalid boolean: expected true/false, got "%s"`,
@@ -105,7 +105,7 @@ func UnmarshalMetadata(data []byte, dest any) *errs.UserFileErr {
 				tVal, err := time.ParseInLocation("2006-01-02", val, time.Local)
 				tVal = tVal.Local()
 				if err != nil {
-					return &errs.UserFileErr{
+					return &errs.UserErr{
 						Field: fieldName,
 						Msg: fmt.Sprintf(
 							`invalid date: expected YYYY-MM-DD, got "%s"`, val,

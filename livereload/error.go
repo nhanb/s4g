@@ -22,7 +22,7 @@ type errTmplInput struct {
 
 func serveError(w http.ResponseWriter, r *http.Request, e error) {
 	var buf bytes.Buffer
-	var uerr *errs.UserFileErr
+	var uerr *errs.UserErr
 	ok := errors.As(e, &uerr)
 
 	var tmplInput errTmplInput
