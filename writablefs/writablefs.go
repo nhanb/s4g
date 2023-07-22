@@ -10,6 +10,7 @@ type FS interface {
 	fs.FS
 	WriteFile(path string, content []byte) error
 	RemoveAll(path string) error
+	MkdirAll(path string) error
 	Path() string
 }
 
@@ -35,4 +36,9 @@ func (w writeDirFS) WriteFile(path string, content []byte) error {
 
 func (w writeDirFS) Path() string {
 	return string(w)
+}
+
+func (w writeDirFS) MkdirAll(path string) error {
+	fullPath := filepath.Join(string(w), path)
+	return os.MkdirAll(fullPath, 0755)
 }

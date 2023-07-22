@@ -1,0 +1,2 @@
+mfws/index.html -> mfws.html
+scale.html -> scale/

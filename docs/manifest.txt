@@ -2,4 +2,6 @@ about/index.html
 feed.xml
 index.html
 mfws.html
+mfws/index.html
+scale.html
 scale/index.html

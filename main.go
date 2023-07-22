@@ -28,6 +28,7 @@ const DjotExt = ".dj"
 const SiteExt = ".wbmkr2k"
 const SiteFileName = "website" + SiteExt
 const FeedPath = "feed.xml"
+const RedirectsPath = "redirects.txt"
 
 func main() {
 	invalidCommand := func() {
@@ -253,6 +254,15 @@ func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 		)
 		generatedFiles[FeedPath] = true
 		fmt.Println("Generated", FeedPath)
+	}
+
+	redirects, uerr := generateRedirects(fsys, RedirectsPath, site.Root)
+	if uerr != nil {
+		return nil, fmt.Errorf("generate redirects: %w", uerr)
+	}
+	for _, p := range redirects {
+		generatedFiles[p] = true
+		fmt.Println("Generated", p)
 	}
 
 	DeleteOldGeneratedFiles(fsys, generatedFiles)
