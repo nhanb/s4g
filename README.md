@@ -7,13 +7,14 @@ stored right next to their sources. This simplifies composing (source dir
 layout _is_ finished website layout; static assets no longer need to be moved
 around) and publishing (simply `rsync`/`git push` your whole dir). It aims to
 be beginner-friendly while encouraging users to fiddle with html/css. To that
-end, the core feature set is purposefully simple:
+end, the core feature set is intentionally simple:
 
 - [x] Finds all `*.dj` files, generates `*.html` in the same place
     + Per-page metadata allows using custom template
 - [x] Generates home page, which is just a predefined `index.dj` + custom
   template. This means the user is free to swap in their own custom home page.
 - [x] Generates RSS/Atom feed
+- [x] Generates redirects from a `redirects.txt` file
 
 Quality-of-life features are not neglected:
 

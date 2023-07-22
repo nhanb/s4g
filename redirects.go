@@ -14,7 +14,9 @@ import (
 )
 
 // Returns list of generated files
-func generateRedirects(fsys writablefs.FS, path string, root string) ([]string, *errs.UserErr) {
+func generateRedirects(
+	fsys writablefs.FS, path string, root string,
+) (generated []string, uerr *errs.UserErr) {
 	f, err := fsys.Open(path)
 	if err != nil {
 		panic(err)
@@ -22,6 +24,7 @@ func generateRedirects(fsys writablefs.FS, path string, root string) ([]string, 
 
 	var sources, dests []string
 
+	// Collect redirects, short circuit if any error found
 	s := bufio.NewScanner(f)
 	lineNo := 0
 	for s.Scan() {
@@ -65,28 +68,38 @@ func generateRedirects(fsys writablefs.FS, path string, root string) ([]string, 
 		dests = append(dests, dest)
 	}
 
+	// Actually generate html redirect files
+	cleanUp := func() {
+		for _, path := range generated {
+			fsys.RemoveAll(path)
+		}
+	}
 	for i, src := range sources {
 		srcDir := filepath.Dir(src)
 		err := fsys.MkdirAll(srcDir)
 		if err != nil {
+			cleanUp()
 			panic(err)
 		}
 
 		var srcBuf bytes.Buffer
 		err = srcTmpl.Execute(&srcBuf, root+dests[i])
 		if err != nil {
+			cleanUp()
 			panic(err)
 		}
 
 		err = fsys.WriteFile(src, srcBuf.Bytes())
 		if err != nil {
+			cleanUp()
 			panic(err)
 		}
 
 		fmt.Printf("Redirect: %s -> %s\n", src, dests[i])
+		generated = append(generated, src)
 	}
 
-	return sources, nil
+	return generated, nil
 }
 
 var srcTmpl = template.Must(template.New("src").Parse(`<!DOCTYPE html>
