@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"go.imnhan.com/webmaker2000/errs"
-	"go.imnhan.com/webmaker2000/writablefs"
+	"go.imnhan.com/s4g/errs"
+	"go.imnhan.com/s4g/writablefs"
 )
 
 // Returns list of generated files

@@ -5,7 +5,7 @@ import (
 	"html/template"
 )
 
-// Represents a user input error, which in webmaker2000's case is almost
+// Represents a user input error, which in s4g's case is almost
 // always some malformed file.
 type UserErr struct {
 	File string

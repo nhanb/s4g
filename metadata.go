@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"go.imnhan.com/webmaker2000/errs"
-	"go.imnhan.com/webmaker2000/writablefs"
+	"go.imnhan.com/s4g/errs"
+	"go.imnhan.com/s4g/writablefs"
 )
 
 type SiteMetadata struct {

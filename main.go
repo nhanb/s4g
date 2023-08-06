@@ -17,22 +17,21 @@ import (
 	"sync"
 	"time"
 
-	"go.imnhan.com/webmaker2000/djot"
-	"go.imnhan.com/webmaker2000/errs"
-	"go.imnhan.com/webmaker2000/gui"
-	"go.imnhan.com/webmaker2000/livereload"
-	"go.imnhan.com/webmaker2000/writablefs"
+	"go.imnhan.com/s4g/djot"
+	"go.imnhan.com/s4g/errs"
+	"go.imnhan.com/s4g/livereload"
+	"go.imnhan.com/s4g/writablefs"
 )
 
 const DjotExt = ".dj"
-const SiteExt = ".wbmkr2k"
+const SiteExt = ".s4g"
 const SiteFileName = "website" + SiteExt
 const FeedPath = "feed.xml"
 const RedirectsPath = "redirects.txt"
 
 func main() {
 	invalidCommand := func() {
-		fmt.Println("Usage: webfolder2000 new|serve|gui [...]")
+		fmt.Println("Usage: s4g new|serve [...]")
 		os.Exit(1)
 	}
 
@@ -40,7 +39,7 @@ func main() {
 	var cmd string
 	var args []string
 	if len(os.Args) < 2 {
-		cmd = "gui"
+		cmd = "serve"
 		args = os.Args[1:]
 	} else {
 		cmd = os.Args[1]
@@ -63,8 +62,6 @@ func main() {
 	case "serve":
 		serveCmd.Parse(args)
 		handleServeCmd(serveFolder, servePort)
-	case "gui":
-		handleGuiCmd()
 	default:
 		invalidCommand()
 	}
@@ -75,22 +72,6 @@ func handleNewCmd(folder string) {
 	err := makeSite(folder, NewSiteMetadata())
 	if err != nil {
 		log.Fatal(err)
-	}
-}
-
-func handleGuiCmd() {
-	task, path, ok := gui.ChooseTask(gui.DefaultTclPath)
-	if !ok {
-		return
-	}
-
-	switch task {
-	case gui.TaskOpen:
-		fmt.Println(task, path)
-	case gui.TaskCreate:
-		fmt.Println(task, path)
-	default:
-		panic(task)
 	}
 }
 

@@ -1,4 +1,4 @@
-module go.imnhan.com/webmaker2000
+module go.imnhan.com/s4g
 
 go 1.20
 

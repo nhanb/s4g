@@ -1,7 +1,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>CoolZone</title>
   <id>https://coolzone.example.com/</id>
-  <link rel="self" href="/webmaker2000/feed.xml"></link>
+  <link rel="self" href="/s4g/feed.xml"></link>
   <updated>2023-04-05T00:00:00+07:00</updated>
   <author>
     <name>Coolio McCool</name>
@@ -10,15 +10,15 @@
   </author>
   <entry>
     <title>This is a motherfucking website.</title>
-    <id>https://coolzone.example.com/webmaker2000/mfws.html</id>
-    <link href="https://coolzone.example.com/webmaker2000/mfws.html"></link>
+    <id>https://coolzone.example.com/s4g/mfws.html</id>
+    <link href="https://coolzone.example.com/s4g/mfws.html"></link>
     <published>2023-04-05T00:00:00+07:00</published>
     <updated>2023-04-05T00:00:00+07:00</updated>
   </entry>
   <entry>
     <title>I&#39;m Going To Scale My Foot Up Your Ass</title>
-    <id>https://coolzone.example.com/webmaker2000/scale/</id>
-    <link href="https://coolzone.example.com/webmaker2000/scale/"></link>
+    <id>https://coolzone.example.com/s4g/scale/</id>
+    <link href="https://coolzone.example.com/s4g/scale/"></link>
     <published>2008-04-24T00:00:00+07:00</published>
     <updated>2008-04-24T00:00:00+07:00</updated>
   </entry>

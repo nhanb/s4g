@@ -2,12 +2,13 @@
 
 **Warning: work in progress**
 
-WebMaker2000 is an in-place static site generator, meaning processed files are
-stored right next to their sources. This simplifies composing (source dir
-layout _is_ finished website layout; static assets no longer need to be moved
-around) and publishing (simply `rsync`/`git push` your whole dir). It aims to
-be beginner-friendly while encouraging users to fiddle with html/css. To that
-end, the core feature set is intentionally simple:
+`s4g` (Stupidly Simple Static Site Generator) is an in-place static site
+generator, meaning processed files are stored right next to their sources.
+This simplifies composing (source dir layout _is_ finished website layout;
+static assets no longer need to be moved around) and publishing
+(simply `rsync`/`git push` your whole dir).
+It aims to be beginner-friendly while encouraging users to fiddle with
+html/css. To that end, the core feature set is intentionally simple:
 
 - [x] Finds all `*.dj` files, generates `*.html` in the same place
     + Per-page metadata allows using custom template
@@ -16,15 +17,13 @@ end, the core feature set is intentionally simple:
 - [x] Generates RSS/Atom feed
 - [x] Generates redirects from a `redirects.txt` file
 
-Quality-of-life features are not neglected:
+Quality-of-life features:
 
 - [x] Livereload with no browser plugin (works but currently polls which is
   noisy, should probably upgrade to websockets)
 - [x] Shows user error messages on the livereloaded web page
-- [ ] Just enough GUI so user doesn't have to touch a terminal
-- [ ] 1-click deploy to popular static hosting targets (git push, rsync, etc.)
 
-There's a sample site up at <https://nhanb.github.io/webmaker2000/about/> which
+There's a sample site up at <https://nhanb.github.io/s4g/about/> which
 also further explains why this project exists.
 
 The markup language of choice is [Djot](https://djot.net/) because it's the
@@ -37,15 +36,13 @@ Requirements: `go` (build), `node` (runtime).
 
 ```sh
 # Install
-go install go.imnhan.com/webmaker2000@latest
+go install go.imnhan.com/s4g@latest
 
 # Create new site
-webmaker2000 new -f ~/my-blog
+s4g new -f ~/my-blog
 
 # Run program, which:
 # - listens to changes and automatically re-generates
 # - starts a local HTTP server for preview, also livereloads on changes
-webmaker2000 serve -f ~/my-blog
+s4g serve -f ~/my-blog
 ```
-
-GUI Coming Soon (tm).

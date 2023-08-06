@@ -7,7 +7,7 @@ import (
 	"html/template"
 	"net/http"
 
-	"go.imnhan.com/webmaker2000/errs"
+	"go.imnhan.com/s4g/errs"
 )
 
 //go:embed error.html
