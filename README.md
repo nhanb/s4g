@@ -23,8 +23,7 @@ Quality-of-life features:
   noisy, should probably upgrade to websockets)
 - [x] Shows user error messages on the livereloaded web page
 
-There's a sample site up at <https://nhanb.github.io/s4g/about/> which
-also further explains why this project exists.
+There's a sample site up at <https://nhanb.github.io/s4g/about/>.
 
 The markup language of choice is [Djot](https://djot.net/) because it's the
 only Markdown derivative that actually tries to be both unambiguous _and_
@@ -46,3 +45,7 @@ s4g new -f ~/my-blog
 # - starts a local HTTP server for preview, also livereloads on changes
 s4g serve -f ~/my-blog
 ```
+
+# TODOs
+
+- When cleaning up outdated files from manifest, delete empty dirs too.
