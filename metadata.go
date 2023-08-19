@@ -64,6 +64,12 @@ func ReadSiteMetadata(fsys writablefs.FS) (*SiteMetadata, error) {
 	return &sm, nil
 }
 
+var timeFormats []string = []string{
+	"2006-01-02",
+	"2006-01-02 15:04",
+	"2006-01-02 15:04:05",
+}
+
 // Similar API to json.Unmarshal but supports neither struct tags nor nesting.
 func UnmarshalMetadata(data []byte, dest any) *errs.UserErr {
 	m := metaTextToMap(data)
@@ -102,13 +108,21 @@ func UnmarshalMetadata(data []byte, dest any) *errs.UserErr {
 				s.Field(i).SetBool(val == "true")
 
 			case "time.Time":
-				tVal, err := time.ParseInLocation("2006-01-02", val, time.Local)
+				var tVal time.Time
+				var err error
+				for _, f := range timeFormats {
+					tVal, err = time.ParseInLocation(f, val, time.Local)
+					if err == nil {
+						break
+					}
+				}
+
 				tVal = tVal.Local()
 				if err != nil {
 					return &errs.UserErr{
 						Field: fieldName,
 						Msg: fmt.Sprintf(
-							`invalid date: expected YYYY-MM-DD, got "%s"`, val,
+							`invalid date: expected YYYY-MM-DD[ HH:MM[:SS]], got "%s"`, val,
 						),
 					}
 				}
