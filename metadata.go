@@ -183,13 +183,17 @@ func SeparateMetadata(r io.Reader) (metadata []byte, body []byte) {
 	readingFrontMatter := true
 	var buffer []byte
 	for s.Scan() {
-		line := bytes.TrimSpace(s.Bytes())
+		line := s.Bytes()
 
-		if readingFrontMatter && bytes.Equal(line, frontMatterSep) {
-			metadata = buffer
-			buffer = body
-			readingFrontMatter = false
-			continue
+		if readingFrontMatter {
+			line = bytes.TrimSpace(s.Bytes())
+
+			if bytes.Equal(line, frontMatterSep) {
+				metadata = buffer
+				buffer = body
+				readingFrontMatter = false
+				continue
+			}
 		}
 
 		buffer = append(buffer, line...)
