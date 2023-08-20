@@ -219,7 +219,6 @@ func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 	})
 
 	for _, a := range articles {
-		fmt.Println(">", a.Path, "-", a.Title)
 		err := a.WriteHtmlFile(site, articlesInNav, articlesInFeed, startYear)
 		if err != nil {
 			return nil, fmt.Errorf("Article %s: %w", a.Path, err)
@@ -243,8 +242,8 @@ func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 	}
 	for _, p := range redirects {
 		generatedFiles[p] = true
-		fmt.Println("Generated", p)
 	}
+	fmt.Printf("Generated %d redirects\n", len(redirects))
 
 	DeleteOldGeneratedFiles(fsys, generatedFiles)
 	WriteManifest(fsys, generatedFiles)

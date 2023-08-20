@@ -95,7 +95,6 @@ func generateRedirects(
 			panic(err)
 		}
 
-		fmt.Printf("Redirect: %s -> %s\n", src, dests[i])
 		generated = append(generated, src)
 	}
 
