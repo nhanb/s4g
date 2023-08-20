@@ -49,3 +49,6 @@ s4g serve -f ~/my-blog
 # TODOs
 
 - When cleaning up outdated files from manifest, delete empty dirs too.
+- Open Graph, Twitter tags (make use of Thumb metadata field too)
+- Checked internal links (link to other article, to other article's asset)
+- Warn when linking to redirected content
