@@ -27,10 +27,10 @@
 <ul>
   {{- range .ArticlesInFeed}}
   {{- if not .IsDraft}}
-  <li>
-    <span class="time-prefix">{{.PostedAt.Local.Format "2006-01-02"}} — </span>
+  <li class="article">
     <a href="{{.WebPath}}">{{.Title}}</a>
-    <span class="time-suffix">({{.PostedAt.Local.Format "2006-01-02"}})</span>
+    <br>
+    <span>{{.PostedAt.Local.Format "January 1, 2006"}}</span>
   </li>
   {{- end}}
   {{- end}}
@@ -64,26 +64,10 @@ hr {
 ul {
   padding: 0;
   list-style: none;
-  /*font-size: 1.1rem;*/
 }
 
-.time-suffix {
-  display: none;
-}
-
-@media (max-width: 30rem) {
-  .time-suffix {
-    display: inline;
-  }
-  .time-prefix {
-    display: none;
-  }
-  li {
-    margin-bottom: 0.5rem;
-  }
-  li::before {
-    content: '❖';
-  }
+.article {
+  margin-bottom: 1rem;
 }
 </style>
 

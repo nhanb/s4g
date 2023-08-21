@@ -1,5 +1,6 @@
 html {
-  font-family: serif;
+  font-family: system-ui, sans-serif;
+  font-size: 1em;
   max-width: 50rem;
   margin: auto;
 }
