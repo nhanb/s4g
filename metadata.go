@@ -16,23 +16,27 @@ import (
 )
 
 type SiteMetadata struct {
-	Address     string
-	Name        string
-	Tagline     string
-	Root        string
-	ShowFooter  bool
-	NavbarLinks []string
-	AuthorName  string
-	AuthorURI   string
-	AuthorEmail string
+	Address       string
+	Name          string
+	Tagline       string
+	Root          string
+	ShowFooter    bool
+	NavbarLinks   []string
+	DefaultThumb  string
+	AuthorName    string
+	AuthorURI     string
+	AuthorEmail   string
+	AuthorTwitter string
 }
 
 type ArticleMetadata struct {
-	Title      string
-	IsDraft    bool
-	PostedAt   time.Time
-	Templates  []string
-	ShowInFeed bool
+	Title       string
+	Description string
+	IsDraft     bool
+	PostedAt    time.Time
+	Templates   []string
+	ShowInFeed  bool
+	Thumb       string
 }
 
 func NewSiteMetadata() SiteMetadata {
@@ -60,6 +64,15 @@ func ReadSiteMetadata(fsys writablefs.FS) (*SiteMetadata, error) {
 	} else {
 		sm.Root = fmt.Sprintf("/%s/", trimmed)
 	}
+
+	// make sure AuthorTwitter starts with an "@"
+	if len(sm.AuthorTwitter) > 0 && sm.AuthorTwitter[0] != '@' {
+		sm.AuthorTwitter = "@" + sm.AuthorTwitter
+	}
+
+	// trim leading "/" because DefaultThumb will be prepended with web root
+	// path when used.
+	sm.DefaultThumb = strings.TrimPrefix(sm.DefaultThumb, "/")
 
 	return &sm, nil
 }
