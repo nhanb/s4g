@@ -5,7 +5,6 @@ import (
 	_ "embed"
 	"fmt"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -15,28 +14,37 @@ var defaultTheme embed.FS
 
 func makeSite(path string, meta SiteMetadata) error {
 	// Create web root dir
-	err := os.MkdirAll(path, 0755)
+	err := os.MkdirAll(filepath.Join(path, S4gDir), 0755)
 	if err != nil {
 		return fmt.Errorf("make site: %w", err)
 	}
 
 	// Write site metadata file
 	data := MarshalMetadata(&meta)
-	err = ioutil.WriteFile(filepath.Join(path, SiteFileName), data, 0664)
+	err = os.WriteFile(filepath.Join(path, SettingsPath), data, 0664)
 	if err != nil {
 		return fmt.Errorf("write site metadata: %w", err)
 	}
 
 	// Copy default theme into new site
-	copyTheme(defaultTheme, path)
+	copyTheme(defaultTheme, filepath.Dir(path+"/"+ThemePath))
 
 	// Write default index page
 	indexData := []byte(`Title: Home
 ShowInFeed: false
-Templates: $_theme/base.tmpl, $_theme/includes.tmpl, $_theme/home.tmpl
+Templates: $base.tmpl, $includes.tmpl, $home.tmpl
 ---
 `)
-	err = ioutil.WriteFile(filepath.Join(path, "index.dj"), indexData, 0664)
+	err = os.WriteFile(filepath.Join(path, "index.dj"), indexData, 0664)
+	if err != nil {
+		panic(err)
+	}
+
+	// Write empty redirects file
+	err = os.WriteFile(filepath.Join(path, RedirectsPath), []byte{}, 0664)
+	if err != nil {
+		panic(err)
+	}
 
 	return nil
 }
@@ -55,7 +63,7 @@ func copyTheme(src fs.FS, dst string) error {
 			return fmt.Errorf("read source file: %w", err)
 		}
 
-		err = ioutil.WriteFile(dstPath, content, 0644)
+		err = os.WriteFile(dstPath, content, 0644)
 		if err != nil {
 			return fmt.Errorf("write dest file: %w", err)
 		}
@@ -63,6 +71,5 @@ func copyTheme(src fs.FS, dst string) error {
 		return nil
 	})
 
-	os.Rename(filepath.Join(dst, "theme"), filepath.Join(dst, "_theme"))
 	return nil
 }

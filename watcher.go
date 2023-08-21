@@ -12,7 +12,7 @@ import (
 	"go.imnhan.com/s4g/writablefs"
 )
 
-var WatchedExts = []string{DjotExt, SiteExt, ".tmpl"}
+var WatchedExts = []string{DjotExt, ".tmpl", ".txt"}
 
 const debounceInterval = 500 * time.Millisecond
 
@@ -25,12 +25,14 @@ func WatchLocalFS(fsys writablefs.FS, callback func()) (Close func() error) {
 		panic(err)
 	}
 
+	fsysPath := fsys.Path()
+
 	fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 		if !d.IsDir() || (shouldIgnore(path) && path != ".") {
 			return nil
 		}
 
-		fullPath := filepath.Join(fsys.Path(), path)
+		fullPath := filepath.Join(fsysPath, path)
 
 		err = watcher.Add(fullPath)
 		if err != nil {
@@ -52,7 +54,11 @@ func WatchLocalFS(fsys writablefs.FS, callback func()) (Close func() error) {
 					return
 				}
 
-				//fmt.Println("EVENT:", event.Op, event.Name)
+				//relPath, err := filepath.Rel(fsysPath, event.Name)
+				//if err != nil {
+				//panic(err)
+				//}
+				//fmt.Println("EVENT:", event.Op, relPath)
 
 				if shouldIgnore(event.Name) {
 					break

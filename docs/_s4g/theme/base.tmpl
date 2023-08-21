@@ -6,7 +6,7 @@
   <title>{{if .Title}}{{.Title}} | {{end}}{{ .Site.Name -}}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="alternate" type="application/atom+xml" title="Atom feed" href="{{.Feed}}">
-  <link rel="stylesheet" href="{{.Site.Root}}_theme/base.css">
+  <link rel="stylesheet" href="{{.ThemePath}}/base.css">
   {{- template "head" .}}
 </head>
 

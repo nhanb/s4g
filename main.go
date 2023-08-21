@@ -24,10 +24,13 @@ import (
 )
 
 const DjotExt = ".dj"
-const SiteExt = ".s4g"
-const SiteFileName = "website" + SiteExt
 const FeedPath = "feed.xml"
-const RedirectsPath = "redirects.txt"
+const S4gDir = "_s4g"
+
+var SettingsPath = S4gDir + "/settings.txt"
+var RedirectsPath = S4gDir + "/redirects.txt"
+var ManifestPath = S4gDir + "/manifest"
+var ThemePath = S4gDir + "/theme"
 
 func main() {
 	invalidCommand := func() {
@@ -194,7 +197,7 @@ func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 		a, ok := articles[link]
 		if !ok {
 			return nil, &errs.UserErr{
-				File:  SiteFileName,
+				File:  SettingsPath,
 				Field: "NavbarLinks",
 				Msg:   fmt.Sprintf(`"%s" does not exist`, link),
 			}
@@ -286,7 +289,7 @@ func computeTemplatePaths(articlePath string, templates []string) []string {
 	for i := 0; i < len(paths); i++ {
 		p := templates[i]
 		if strings.HasPrefix(p, "$") {
-			paths[i] = strings.TrimPrefix(p, "$")
+			paths[i] = ThemePath + "/" + strings.TrimPrefix(p, "$")
 		} else {
 			paths[i] = filepath.Join(filepath.Dir(articlePath), p)
 		}
@@ -321,6 +324,7 @@ func (a *Article) WriteHtmlFile(
 		Feed           string
 		Now            time.Time
 		StartYear      int
+		ThemePath      string
 	}{
 		Site:           site,
 		Content:        template.HTML(contentHtml),
@@ -331,6 +335,7 @@ func (a *Article) WriteHtmlFile(
 		Feed:           site.Root + FeedPath,
 		Now:            time.Now(),
 		StartYear:      startYear,
+		ThemePath:      site.Root + ThemePath,
 	})
 	if err != nil {
 		return fmt.Errorf("Failed to execute templates (%v): %w", a.Templates, err)
@@ -368,9 +373,9 @@ func findArticles(fsys writablefs.FS, site *SiteMetadata) (map[string]Article, e
 
 		meta := ArticleMetadata{
 			Templates: []string{
-				"$_theme/base.tmpl",
-				"$_theme/includes.tmpl",
-				"$_theme/post.tmpl",
+				"$base.tmpl",
+				"$includes.tmpl",
+				"$post.tmpl",
 			},
 			ShowInFeed: true,
 		}

@@ -6,7 +6,7 @@
   <title>Home | CoolZone</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="alternate" type="application/atom+xml" title="Atom feed" href="/s4g/feed.xml">
-  <link rel="stylesheet" href="/s4g/_theme/base.css">
+  <link rel="stylesheet" href="/s4g/_s4g/theme/base.css">
 </head>
 
 <body>
@@ -22,7 +22,7 @@
   <a href="/s4g/">Home</a>
   <a href="/s4g/about/">About</a>
   <a class="feed-link" href="/s4g/feed.xml">
-    <img src="/s4g/_theme/feed.svg" alt="Atom Feed" title="Atom Feed">
+    <img src="/s4g/_s4g/theme/feed.svg" alt="Atom Feed" title="Atom Feed">
   </a>
 </div>
 
@@ -33,15 +33,15 @@
 <p>All posts, newest first:</p>
 
 <ul>
-  <li>
-    <span class="time-prefix">2023-04-05 — </span>
+  <li class="article">
     <a href="/s4g/mfws.html">This is a motherfucking website.</a>
-    <span class="time-suffix">(2023-04-05)</span>
+    <br>
+    <span>April 4, 2023</span>
   </li>
-  <li>
-    <span class="time-prefix">2008-04-24 — </span>
+  <li class="article">
     <a href="/s4g/scale/">I&#39;m Going To Scale My Foot Up Your Ass</a>
-    <span class="time-suffix">(2008-04-24)</span>
+    <br>
+    <span>April 4, 2008</span>
   </li>
 </ul>
 
@@ -71,26 +71,10 @@ hr {
 ul {
   padding: 0;
   list-style: none;
-   
 }
 
-.time-suffix {
-  display: none;
-}
-
-@media (max-width: 30rem) {
-  .time-suffix {
-    display: inline;
-  }
-  .time-prefix {
-    display: none;
-  }
-  li {
-    margin-bottom: 0.5rem;
-  }
-  li::before {
-    content: '❖';
-  }
+.article {
+  margin-bottom: 1rem;
 }
 </style>
 

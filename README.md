@@ -54,4 +54,3 @@ s4g serve -f ~/my-blog
 - Warn when linking to redirected content
 - Home page: align multi-line article title
 - Minify/prettify HTML (optional?)
-- Move s4g-specific files into own dir to avoid polluting root dir.

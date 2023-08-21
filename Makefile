@@ -5,7 +5,7 @@ watch:
 	fd -E docs -E theme | entr -rc go run . serve
 
 watch-theme:
-	find theme/* | entr -c rsync -av theme/ docs/_theme/
+	find theme/* | entr -c rsync -av theme/ docs/_s4g/theme/
 
 # Cheating a little because the djot.js repo on github does not provide builds
 update-djot:

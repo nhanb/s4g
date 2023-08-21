@@ -46,7 +46,7 @@ func NewSiteMetadata() SiteMetadata {
 func ReadSiteMetadata(fsys writablefs.FS) (*SiteMetadata, error) {
 	sm := NewSiteMetadata()
 
-	data, err := fs.ReadFile(fsys, SiteFileName)
+	data, err := fs.ReadFile(fsys, SettingsPath)
 	if err != nil {
 		return nil, fmt.Errorf("ReadSiteMetadata: %w", err)
 	}

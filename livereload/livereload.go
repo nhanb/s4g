@@ -3,6 +3,7 @@ package livereload
 import (
 	"bytes"
 	_ "embed"
+	"fmt"
 	"io/fs"
 	"net/http"
 	"strings"
@@ -128,6 +129,9 @@ func Trigger() {
 // When a non-nil error is set, the local webserver returns
 // the error page for every path (except livereload duh).
 func SetError(err error) {
+	if err != nil {
+		fmt.Println("ERR:", err.Error())
+	}
 	state.errMut.Lock()
 	state.err = err
 	state.errMut.Unlock()

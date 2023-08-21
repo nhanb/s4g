@@ -1,6 +1,6 @@
 Title: I'm Going To Scale My Foot Up Your Ass
 PostedAt: 2008-04-24
-Templates: $_theme/base.tmpl, $_theme/includes.tmpl, scale.tmpl
+Templates: $base.tmpl, $includes.tmpl, scale.tmpl
 ---
 
 _by [Ted Dziuba][1]_
