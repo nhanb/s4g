@@ -261,13 +261,17 @@ type Article struct {
 	OutputPath string
 	DjotBody   []byte
 	ArticleMetadata
-	WebPath       string
-	TemplatePaths []string
+	WebPath        string
+	TemplatePaths  []string
+	OpenGraphImage string
 }
 
-func (a *Article) ComputeDerivedFields(root string) {
+func (a *Article) ComputeDerivedFields(addr, root string) {
 	a.WebPath = computeWebPath(root, a.OutputPath)
 	a.TemplatePaths = computeTemplatePaths(a.Path, a.Templates)
+	if a.Thumb != "" {
+		a.OpenGraphImage = addr + root + filepath.Dir(a.Path) + "/" + a.Thumb
+	}
 }
 
 func computeWebPath(root string, outputPath string) string {
@@ -393,7 +397,7 @@ func findArticles(fsys writablefs.FS, site *SiteMetadata) (map[string]Article, e
 			DjotBody:        bodyText,
 			ArticleMetadata: meta,
 		}
-		article.ComputeDerivedFields(site.Root)
+		article.ComputeDerivedFields(site.Address, site.Root)
 		result[article.Path] = article
 		return nil
 	})

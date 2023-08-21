@@ -15,12 +15,12 @@
     <meta property="og:description" content="{{.Post.Description}}" />
     <meta name="twitter:description" content="{{.Post.Description}}" />
   {{- end -}}
-  {{- if .Post.Thumb -}}
-    <meta property="og:image" content="{{.Post.Thumb}}" />
-    <meta name="twitter:image" content="{{.Post.Thumb}}" />
+  {{- if .Post.OpenGraphImage -}}
+    <meta property="og:image" content="{{.Post.OpenGraphImage}}" />
+    <meta name="twitter:image" content="{{.Post.OpenGraphImage}}" />
   {{- else if .Site.DefaultThumb -}}
-    <meta property="og:image" content="{{.Site.Root}}{{.Site.DefaultThumb}}" />
-    <meta name="twitter:image" content="{{.Site.Root}}{{.Site.DefaultThumb}}" />
+    <meta property="og:image" content="{{.Site.Address}}{{.Site.Root}}{{.Site.DefaultThumb}}" />
+    <meta name="twitter:image" content="{{.Site.Address}}{{.Site.Root}}{{.Site.DefaultThumb}}" />
   {{- end }}
   {{- if .Site.AuthorTwitter -}}
     <meta name="twitter:site" content="{{.Site.AuthorTwitter}}" />
