@@ -52,3 +52,6 @@ s4g serve -f ~/my-blog
 - Open Graph, Twitter tags (make use of Thumb metadata field too)
 - Checked internal links (link to other article, to other article's asset)
 - Warn when linking to redirected content
+- Home page: align multi-line article title
+- Minify/prettify HTML (optional?)
+- Move s4g-specific files into own dir to avoid polluting root dir.
