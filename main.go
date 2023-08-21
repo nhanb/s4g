@@ -53,10 +53,11 @@ func main() {
 	newCmd := flag.NewFlagSet("new", flag.ExitOnError)
 	newCmd.StringVar(&newFolder, "f", "site1", "Folder for new website")
 
-	var serveFolder, servePort string
+	var serveFolder, servePort, serveHost string
 	serveCmd := flag.NewFlagSet("serve", flag.ExitOnError)
-	serveCmd.StringVar(&serveFolder, "f", "docs", "Folder for existing website")
-	serveCmd.StringVar(&servePort, "p", "3338", "Port for local preview server")
+	serveCmd.StringVar(&serveFolder, "f", ".", "Website's root folder")
+	serveCmd.StringVar(&serveHost, "h", "127.0.0.1", "Local server host")
+	serveCmd.StringVar(&servePort, "p", "3338", "Local server port")
 
 	switch cmd {
 	case "new":
@@ -64,7 +65,7 @@ func main() {
 		handleNewCmd(newFolder)
 	case "serve":
 		serveCmd.Parse(args)
-		handleServeCmd(serveFolder, servePort)
+		handleServeCmd(serveFolder, serveHost+":"+servePort)
 	default:
 		invalidCommand()
 	}
@@ -78,7 +79,7 @@ func handleNewCmd(folder string) {
 	}
 }
 
-func handleServeCmd(folder, port string) {
+func handleServeCmd(folder, addr string) {
 	djot.StartService()
 	fmt.Println("Started djot.js service")
 
@@ -100,7 +101,7 @@ func handleServeCmd(folder, port string) {
 	go func(webRoot string) {
 		defer wg.Done()
 
-		srv := runServer(fsys, webRoot, port)
+		srv := runServer(fsys, webRoot, addr)
 
 		for {
 			newRoot := <-webRootUpdates
@@ -113,7 +114,7 @@ func handleServeCmd(folder, port string) {
 			if err != nil {
 				panic(err)
 			}
-			srv = runServer(fsys, webRoot, port)
+			srv = runServer(fsys, webRoot, addr)
 		}
 	}(site.Root)
 
@@ -141,8 +142,8 @@ func handleServeCmd(folder, port string) {
 }
 
 // Non-blocking. Returns srv handle to allow calling Shutdown() later.
-func runServer(fsys writablefs.FS, webRoot string, port string) *http.Server {
-	println("Serving local website at http://localhost:" + port + webRoot)
+func runServer(fsys writablefs.FS, webRoot, addr string) *http.Server {
+	fmt.Printf("Serving local website at %s%s\n", addr, webRoot)
 	mux := http.NewServeMux()
 	mux.Handle(
 		webRoot,
@@ -159,7 +160,7 @@ func runServer(fsys writablefs.FS, webRoot string, port string) *http.Server {
 	}
 
 	srv := &http.Server{
-		Addr:    "127.0.0.1:" + port,
+		Addr:    addr,
 		Handler: mux,
 	}
 
