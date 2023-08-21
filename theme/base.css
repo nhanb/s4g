@@ -19,3 +19,25 @@ footer {
   text-align: right;
   font-size: 0.8rem;
 }
+
+pre {
+  padding: 0.5rem;
+  border: 1px solid black;
+  background-color: #eee;
+  overflow-y: scroll;
+}
+
+blockquote {
+  padding-left: 7px;
+  margin: 1.5rem 0 1.5rem 2rem;
+  quotes: "\201C" "\201D";
+  /* prevent long links from breaking out of the blockquote: */
+  overflow-wrap: break-word;
+}
+blockquote::before {
+  position: absolute;
+  margin-left: -0.5em;
+  margin-top: -0.25em;
+  font-size: 3em;
+  content: open-quote;
+}
