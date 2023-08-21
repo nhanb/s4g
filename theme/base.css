@@ -10,7 +10,8 @@ ol {
   line-height: 1.35rem;
 }
 
-main img {
+main img,
+main video {
   max-width: 100%;
 }
 
@@ -20,11 +21,20 @@ footer {
   font-size: 0.8rem;
 }
 
-pre {
-  padding: 0.5rem;
+pre,
+.sidenote {
   border: 1px solid black;
   background-color: #eee;
+  padding: 0.5rem;
+}
+pre {
   overflow-y: scroll;
+}
+.sidenote {
+  margin-left: 2rem;
+}
+.sidenote p {
+  margin: 0;
 }
 
 blockquote {
@@ -40,4 +50,8 @@ blockquote::before {
   margin-top: -0.25em;
   font-size: 3em;
   content: open-quote;
+}
+
+sup {
+  line-height: 1rem; /* prevents it from pushing up the line */
 }
