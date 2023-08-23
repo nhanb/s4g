@@ -2,7 +2,7 @@ Address: https://coolzone.example.com
 Name: CoolZone
 Tagline: Cool people only.
 Root: /s4g/
-NavbarLinks: index.dj, about/index.dj
+NavbarLinks: index.dj, about/index.dj, #GitHub#https://github.com/nhanb/s4g
 
 AuthorName: Coolio McCool
 AuthorURI: https://author.example.com

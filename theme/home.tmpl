@@ -9,8 +9,8 @@
 <hr>
 
 <div class="pages">
-{{- range .ArticlesInNav}}
-  <a href="{{.WebPath}}">{{.Title}}</a>
+{{- range .NavLinks}}
+  <a href="{{.Url}}">{{.Text}}</a>
 {{- end}}
   <a class="feed-link" href="{{.Feed}}">
     <img src="{{.ThemePath}}/feed.svg" alt="Atom Feed" title="Atom Feed">

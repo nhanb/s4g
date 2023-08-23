@@ -171,6 +171,11 @@ func runServer(fsys writablefs.FS, webRoot, addr string) *http.Server {
 	return srv
 }
 
+type Link struct {
+	Text string
+	Url  string
+}
+
 func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 	defer timer("Took %s")()
 
@@ -193,17 +198,27 @@ func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 
 	generatedFiles := make(map[string]bool)
 
-	var articlesInNav []*Article
-	for _, link := range site.NavbarLinks {
-		a, ok := articles[link]
+	var navLinks []Link
+	// A NavbarLinks item can either be a path to a .dj file,
+	// or an arbitrary link in the form of: #Text#Url
+	for _, item := range site.NavbarLinks {
+
+		if item[0] == '#' {
+			var link Link
+			link.Text, link.Url, _ = strings.Cut(item[1:], "#")
+			navLinks = append(navLinks, link)
+			continue
+		}
+
+		ar, ok := articles[item]
 		if !ok {
 			return nil, &errs.UserErr{
 				File:  SettingsPath,
 				Field: "NavbarLinks",
-				Msg:   fmt.Sprintf(`"%s" does not exist`, link),
+				Msg:   fmt.Sprintf(`"%s" does not exist`, item),
 			}
 		}
-		articlesInNav = append(articlesInNav, a)
+		navLinks = append(navLinks, Link{Text: ar.Title, Url: ar.WebPath})
 	}
 
 	var articlesInFeed []*Article
@@ -233,7 +248,7 @@ func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 	}
 
 	for _, a := range articles {
-		err := a.WriteHtmlFile(site, articlesInNav, articlesInFeed, startYear)
+		err := a.WriteHtmlFile(site, navLinks, articlesInFeed, startYear)
 		if err != nil {
 			return nil, fmt.Errorf("Article %s: %w", a.Path, err)
 		}
@@ -348,7 +363,7 @@ func (a *Article) computeTemplatePaths() {
 
 func (a *Article) WriteHtmlFile(
 	site *SiteMetadata,
-	articlesInNav []*Article,
+	navLinks []Link,
 	articlesInFeed []*Article,
 	startYear int,
 ) error {
@@ -368,7 +383,7 @@ func (a *Article) WriteHtmlFile(
 		Content        template.HTML
 		Title          string
 		Post           *Article
-		ArticlesInNav  []*Article
+		NavLinks       []Link
 		ArticlesInFeed []*Article
 		Feed           string
 		Now            time.Time
@@ -379,7 +394,7 @@ func (a *Article) WriteHtmlFile(
 		Content:        template.HTML(contentHtml),
 		Title:          a.Title,
 		Post:           a,
-		ArticlesInNav:  articlesInNav,
+		NavLinks:       navLinks,
 		ArticlesInFeed: articlesInFeed,
 		Feed:           site.Root + FeedPath,
 		Now:            time.Now(),

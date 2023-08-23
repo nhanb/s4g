@@ -1,8 +1,8 @@
 {{define "navbar"}}
 <link rel="stylesheet" href="{{.ThemePath}}/navbar.css">
 <nav>
-  {{- range .ArticlesInNav}}
-  <a href="{{.WebPath}}">{{.Title}}</a>
+  {{- range .NavLinks}}
+  <a href="{{.Url}}">{{.Text}}</a>
   {{- end}}
 
   {{- if not .Post.PostedAt.IsZero}}
