@@ -420,7 +420,6 @@ func findArticles(fsys writablefs.FS, site *SiteMetadata) (map[string]*Article, 
 	var seriesPaths []string
 
 	err := fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
-		fmt.Println("DIR:", path)
 		if d.IsDir() || !strings.HasSuffix(d.Name(), DjotExt) {
 			return nil
 		}
