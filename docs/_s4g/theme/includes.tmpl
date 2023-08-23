@@ -23,7 +23,7 @@
 {{- if .Site.ShowFooter -}}
 <footer>
 © {{if eq .StartYear .Now.Year}}{{.StartYear}}{{else}}{{.StartYear}}–{{.Now.Year}}{{end}} {{.Site.AuthorName}}<br>
-Made with <a href="https://github.com/nhanb/s4g">s4g</a>
+{{.Site.FooterText}}
 </footer>
 {{- end -}}
 {{- end}}

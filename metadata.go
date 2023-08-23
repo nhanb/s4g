@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"html/template"
 	"io"
 	"io/fs"
 	"reflect"
@@ -21,6 +22,7 @@ type SiteMetadata struct {
 	Tagline       string
 	Root          string
 	ShowFooter    bool
+	FooterText    template.HTML
 	NavbarLinks   []string
 	DefaultThumb  string
 	AuthorName    string
@@ -83,6 +85,7 @@ func NewSiteMetadata() SiteMetadata {
 	return SiteMetadata{
 		Root:        "/",
 		ShowFooter:  true,
+		FooterText:  `Made with <a href="https://github.com/nhanb/s4g">s4g</a>`,
 		NavbarLinks: []string{"index.dj"},
 	}
 }
@@ -198,6 +201,10 @@ func UnmarshalMetadata(data []byte, dest any) *errs.UserErr {
 					}
 				}
 				s.Field(i).Set(reflect.ValueOf(pt))
+
+			case "template.HTML":
+				html := template.HTML(val)
+				s.Field(i).Set(reflect.ValueOf(html))
 
 			default:
 				panic(fmt.Sprintf(
