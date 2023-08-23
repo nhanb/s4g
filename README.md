@@ -1,7 +1,5 @@
 ![2-men-building-a-website](website-builder.jpg)
 
-**Warning: work in progress**
-
 `s4g` (Stupidly Simple Static Site Generator) is an in-place static site
 generator, meaning processed files are stored right next to their sources.
 This simplifies composing (source dir layout _is_ finished website layout;
@@ -16,6 +14,8 @@ html/css. To that end, the core feature set is intentionally simple:
   template. This means the user is free to swap in their own custom home page.
 - [x] Generates RSS/Atom feed
 - [x] Generates redirects from a `redirects.txt` file
+- [x] Post series
+- [x] Arbitrary navbar links, custom footer
 
 Quality-of-life features:
 
