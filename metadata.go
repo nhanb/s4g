@@ -29,11 +29,51 @@ type SiteMetadata struct {
 	AuthorTwitter string
 }
 
+type PageType int
+
+const (
+	PTPost PageType = iota
+	PTHome
+	PTSeriesIndex
+	PTCustom
+)
+
+func (t PageType) String() string {
+	switch t {
+	case PTPost:
+		return "post"
+	case PTHome:
+		return "home"
+	case PTSeriesIndex:
+		return "series-index"
+	case PTCustom:
+		return "custom"
+	default:
+		panic(fmt.Sprintf("unexpected value: %d", t))
+	}
+}
+
+func ParsePageType(name string) (PageType, error) {
+	switch name {
+	case "post":
+		return PTPost, nil
+	case "home":
+		return PTHome, nil
+	case "series-index":
+		return PTSeriesIndex, nil
+	case "custom":
+		return PTCustom, nil
+	default:
+		return -1, fmt.Errorf(`"%s" is not a valid PageType`, name)
+	}
+}
+
 type ArticleMetadata struct {
 	Title       string
 	Description string
 	IsDraft     bool
 	PostedAt    time.Time
+	PageType    PageType
 	Templates   []string
 	ShowInFeed  bool
 	Thumb       string
@@ -148,6 +188,16 @@ func UnmarshalMetadata(data []byte, dest any) *errs.UserErr {
 					trimmed[i] = strings.TrimSpace(parts[i])
 				}
 				s.Field(i).Set(reflect.ValueOf(trimmed))
+
+			case "main.PageType":
+				pt, err := ParsePageType(val)
+				if err != nil {
+					return &errs.UserErr{
+						Field: fieldName,
+						Msg:   err.Error(),
+					}
+				}
+				s.Field(i).Set(reflect.ValueOf(pt))
 
 			default:
 				panic(fmt.Sprintf(

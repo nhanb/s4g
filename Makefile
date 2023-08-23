@@ -2,7 +2,8 @@ build:
 	go build -o dist/
 
 watch:
-	fd -E docs -E theme | entr -rc go run . serve -f docs -p 8000
+	fd -E docs -E theme | entr -rc -s \
+		'go build -o dist/ && ./dist/s4g serve -f docs -p 8000'
 
 watch-theme:
 	find theme/* | entr -c rsync -av theme/ docs/_s4g/theme/

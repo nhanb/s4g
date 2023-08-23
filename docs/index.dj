@@ -1,4 +1,4 @@
 Title: Home
 ShowInFeed: false
-Templates: $base.tmpl, $includes.tmpl, $home.tmpl
+PageType: home
 ---

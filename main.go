@@ -267,15 +267,16 @@ type Article struct {
 }
 
 func (a *Article) ComputeDerivedFields(addr, root string) {
-	a.WebPath = computeWebPath(root, a.OutputPath)
-	a.TemplatePaths = computeTemplatePaths(a.Path, a.Templates)
+	a.computeWebPath(root)
+	a.computeTemplatePaths()
+
 	if a.Thumb != "" {
 		a.OpenGraphImage = addr + root + filepath.Dir(a.Path) + "/" + a.Thumb
 	}
 }
 
-func computeWebPath(root string, outputPath string) string {
-	webPath := root + outputPath
+func (a *Article) computeWebPath(root string) {
+	webPath := root + a.OutputPath
 	if strings.HasSuffix(webPath, "/index.html") {
 		webPath = strings.TrimSuffix(webPath, "index.html")
 	}
@@ -286,20 +287,47 @@ func computeWebPath(root string, outputPath string) string {
 		escaped[i] = url.PathEscape(parts[i])
 	}
 
-	return strings.Join(escaped, "/")
+	a.WebPath = strings.Join(escaped, "/")
 }
 
-func computeTemplatePaths(articlePath string, templates []string) []string {
+func (a *Article) computeTemplatePaths() {
+	var templates []string
+	switch a.PageType {
+	case PTPost:
+		templates = []string{
+			"$base.tmpl",
+			"$includes.tmpl",
+			"$post.tmpl",
+		}
+	case PTHome:
+		templates = []string{
+			"$base.tmpl",
+			"$includes.tmpl",
+			"$home.tmpl",
+		}
+	case PTSeriesIndex:
+		templates = []string{
+			"$base.tmpl",
+			"$includes.tmpl",
+			"$series-index.tmpl",
+		}
+	case PTCustom:
+		templates = a.Templates
+	default:
+		panic(fmt.Sprintf("Invalid PageType: %v", a.PageType))
+	}
+
 	paths := make([]string, len(templates))
 	for i := 0; i < len(paths); i++ {
 		p := templates[i]
 		if strings.HasPrefix(p, "$") {
 			paths[i] = ThemePath + "/" + strings.TrimPrefix(p, "$")
 		} else {
-			paths[i] = filepath.Join(filepath.Dir(articlePath), p)
+			paths[i] = filepath.Join(filepath.Dir(a.Path), p)
 		}
 	}
-	return paths
+
+	a.TemplatePaths = paths
 }
 
 func (a *Article) WriteHtmlFile(
@@ -314,7 +342,7 @@ func (a *Article) WriteHtmlFile(
 	// TODO: should probably reuse the template object for common cases
 	if err != nil {
 		return fmt.Errorf(
-			"Failed to parse templates (%v): %w", a.Templates, err,
+			"Failed to parse templates (%v): %w", a.TemplatePaths, err,
 		)
 	}
 
@@ -343,7 +371,7 @@ func (a *Article) WriteHtmlFile(
 		ThemePath:      site.Root + ThemePath,
 	})
 	if err != nil {
-		return fmt.Errorf("Failed to execute templates (%v): %w", a.Templates, err)
+		return fmt.Errorf("Failed to execute templates (%v): %w", a.TemplatePaths, err)
 	}
 	fullHtml := buf.Bytes()
 
@@ -377,17 +405,29 @@ func findArticles(fsys writablefs.FS, site *SiteMetadata) (map[string]Article, e
 		}
 
 		meta := ArticleMetadata{
-			Templates: []string{
-				"$base.tmpl",
-				"$includes.tmpl",
-				"$post.tmpl",
-			},
+			PageType:   PTPost,
 			ShowInFeed: true,
 		}
 		userErr := UnmarshalMetadata(metaText, &meta)
 		if userErr != nil {
 			userErr.File = path
 			return fmt.Errorf("findArticles failed to unmarshall metadata: %w", userErr)
+		}
+
+		if meta.PageType != PTCustom && len(meta.Templates) > 0 {
+			return &errs.UserErr{
+				File:  path,
+				Field: "PageType",
+				Msg:   `you must set "PageType: custom" in order to use custom Templates`,
+			}
+		}
+
+		if meta.PageType == PTCustom && len(meta.Templates) == 0 {
+			return &errs.UserErr{
+				File:  path,
+				Field: "Templates",
+				Msg:   `custom PageType requires a non-empty Templates list`,
+			}
 		}
 
 		article := Article{

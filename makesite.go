@@ -32,7 +32,7 @@ func makeSite(path string, meta SiteMetadata) error {
 	// Write default index page
 	indexData := []byte(`Title: Home
 ShowInFeed: false
-Templates: $base.tmpl, $includes.tmpl, $home.tmpl
+PageType: home
 ---
 `)
 	err = os.WriteFile(filepath.Join(path, "index.dj"), indexData, 0664)
