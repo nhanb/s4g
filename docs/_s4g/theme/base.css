@@ -3,6 +3,9 @@ html {
   font-size: 1em;
   max-width: 50rem;
   margin: auto;
+  /* Always show scrollbar, to prevent content shifting when navigating
+   * between long and short pages: */
+  overflow-y: scroll;
 }
 
 p,
