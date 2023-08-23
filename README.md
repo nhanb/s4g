@@ -1,5 +1,3 @@
-![2-men-building-a-website](website-builder.jpg)
-
 `s4g` (Stupidly Simple Static Site Generator) is an in-place static site
 generator, meaning processed files are stored right next to their sources.
 This simplifies composing (source dir layout _is_ finished website layout;
@@ -24,17 +22,19 @@ Quality-of-life features:
 - [x] Shows user error messages on the livereloaded web page
 
 There's a sample site up at <https://nhanb.github.io/s4g/about/>.
+I'm also using s4g to generate my own blog: <https://hi.imnhan.com/>.
 
 The markup language of choice is [Djot](https://djot.net/) because it's the
 only Markdown derivative that actually tries to be both unambiguous _and_
-useful.
+extensible.
 
-Currently works on Linux. The plan is to package for Windows & macOS too.
+Currently works on Linux. It should also work on macOS and Windows (probably
+with a tweak to how it calls nodejs), but I'm not testing that.
 
 Requirements: `go` (build), `node` (runtime).
 
 ```sh
-# Install
+sudo pacman -Syu go nodejs
 go install go.imnhan.com/s4g@latest
 
 # Create new site
@@ -43,12 +43,17 @@ s4g new -f ~/my-blog
 # Run program, which:
 # - listens to changes and automatically re-generates
 # - starts a local HTTP server for preview, also livereloads on changes
-s4g serve -f ~/my-blog
+cd ~/my-blog
+s4g
 ```
 
-# TODOs
+# Documentation
 
-- When cleaning up outdated files from manifest, delete empty dirs too.
+Distant TODO. Maybe I'll write a blog post and call it a day.
+
+# Potential nice-to-haves
+
+- When cleaning up outdated files from manifest, delete empty dirs too
 - Checked internal links (link to other article, to other article's asset)
 - Warn when linking to redirected content
-- Minify/prettify HTML (optional?)
+- Minify/prettify HTML
