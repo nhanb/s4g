@@ -193,7 +193,7 @@ func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 
 	generatedFiles := make(map[string]bool)
 
-	var articlesInNav []Article
+	var articlesInNav []*Article
 	for _, link := range site.NavbarLinks {
 		a, ok := articles[link]
 		if !ok {
@@ -206,7 +206,7 @@ func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 		articlesInNav = append(articlesInNav, a)
 	}
 
-	var articlesInFeed []Article
+	var articlesInFeed []*Article
 	startYear := time.Now().Year()
 	for _, a := range articles {
 		if a.ShowInFeed {
@@ -221,6 +221,16 @@ func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 	sort.Slice(articlesInFeed, func(i int, j int) bool {
 		return articlesInFeed[i].PostedAt.Compare(articlesInFeed[j].PostedAt) > 0
 	})
+
+	// TODO: fix wasteful loop?
+	for _, a := range articles {
+		// Sort articles in series, oldest first
+		if len(a.Children) > 0 {
+			sort.Slice(a.Children, func(i int, j int) bool {
+				return a.Children[i].PostedAt.Compare(a.Children[j].PostedAt) < 0
+			})
+		}
+	}
 
 	for _, a := range articles {
 		err := a.WriteHtmlFile(site, articlesInNav, articlesInFeed, startYear)
@@ -264,6 +274,12 @@ type Article struct {
 	WebPath        string
 	TemplatePaths  []string
 	OpenGraphImage string
+	Parent         *Article
+	Children       []*Article
+}
+
+func (a *Article) IsSeriesIndex() bool {
+	return a.PageType == PTSeriesIndex
 }
 
 func (a *Article) ComputeDerivedFields(addr, root string) {
@@ -332,8 +348,8 @@ func (a *Article) computeTemplatePaths() {
 
 func (a *Article) WriteHtmlFile(
 	site *SiteMetadata,
-	articlesInNav []Article,
-	articlesInFeed []Article,
+	articlesInNav []*Article,
+	articlesInFeed []*Article,
 	startYear int,
 ) error {
 	contentHtml := djot.ToHtml(a.DjotBody)
@@ -352,8 +368,8 @@ func (a *Article) WriteHtmlFile(
 		Content        template.HTML
 		Title          string
 		Post           *Article
-		ArticlesInNav  []Article
-		ArticlesInFeed []Article
+		ArticlesInNav  []*Article
+		ArticlesInFeed []*Article
 		Feed           string
 		Now            time.Time
 		StartYear      int
@@ -384,10 +400,12 @@ func (a *Article) WriteHtmlFile(
 	return nil
 }
 
-func findArticles(fsys writablefs.FS, site *SiteMetadata) (map[string]Article, error) {
-	result := make(map[string]Article)
+func findArticles(fsys writablefs.FS, site *SiteMetadata) (map[string]*Article, error) {
+	articles := make(map[string]*Article)
+	var seriesPaths []string
 
 	err := fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
+		fmt.Println("DIR:", path)
 		if d.IsDir() || !strings.HasSuffix(d.Name(), DjotExt) {
 			return nil
 		}
@@ -438,12 +456,31 @@ func findArticles(fsys writablefs.FS, site *SiteMetadata) (map[string]Article, e
 			ArticleMetadata: meta,
 		}
 		article.ComputeDerivedFields(site.Address, site.Root)
-		result[article.Path] = article
+
+		if article.PageType == PTSeriesIndex {
+			seriesPaths = append(seriesPaths, article.Path)
+		}
+
+		articles[article.Path] = &article
 		return nil
 	})
 
 	if err != nil {
 		return nil, err
 	}
-	return result, nil
+
+	// TODO: there must be a more... elegant way?
+	for _, sPath := range seriesPaths {
+		for aPath, a := range articles {
+			if a.PageType != PTSeriesIndex &&
+				filepath.Dir(sPath) == filepath.Dir(filepath.Dir(aPath)) {
+				child := a
+				parent := articles[sPath]
+				parent.Children = append(parent.Children, child)
+				child.Parent = parent
+			}
+		}
+	}
+
+	return articles, nil
 }

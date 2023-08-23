@@ -9,7 +9,7 @@ import (
 
 // TODO: Use Article's updated date instead of PostedAt.
 // I need to implement Article.UpdatedAt first though.
-func generateFeed(site *SiteMetadata, posts []Article, path string) []byte {
+func generateFeed(site *SiteMetadata, posts []*Article, path string) []byte {
 	siteAddr := site.Address
 	if !strings.HasSuffix(siteAddr, "/") {
 		siteAddr += "/"

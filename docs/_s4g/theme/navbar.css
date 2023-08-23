@@ -5,6 +5,7 @@ nav > a {
 nav > .posted-on {
   float: right;
   font-style: italic;
+  margin-bottom: 0.5rem;
 }
 
 .nav-hr {

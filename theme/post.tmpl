@@ -5,8 +5,47 @@
 {{- template "navbar" .}}
 
 <main>
+
+{{- if .Post.Parent }}
+<em>
+  This post is part of
+  <a href="{{.Post.Parent.WebPath}}">{{.Post.Parent.Title}}</a>
+</em>
+<hr>
+{{- end }}
+
 <h1>{{.Post.Title}}</h1>
+
 {{.Content}}
+{{if .Post.Parent }}
+  <div class="series-container">
+    <p>
+      Here's every post in
+      <a href="{{.Post.Parent.WebPath}}">{{.Post.Parent.Title}}</a>,
+      in chronological order:
+    </p>
+
+    <ol>
+    {{- range .Post.Parent.Children }}
+      {{ if not .IsDraft -}}
+      <li><a href="{{.WebPath}}">{{.Title}}</a>
+          {{- if eq $.Post.WebPath .WebPath }} (you are here) {{- end -}}
+      </li>
+      {{- end -}}
+    {{ end }}
+    </ol>
+  </div>
+
+  <style>
+    .series-container {
+      margin: 2rem 0;
+      padding: 0 1rem;
+      border: 1px dashed #aaa;
+      background-color: #eee;
+    }
+  </style>
+{{ end -}}
+
 </main>
 
 {{template "footer" .}}

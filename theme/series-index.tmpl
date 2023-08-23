@@ -1,0 +1,27 @@
+{{- define "head"}}{{- end}}
+
+{{define "body"}}
+
+{{- template "navbar" .}}
+
+<main>
+
+<h1>{{.Post.Title}}</h1>
+{{.Content}}
+
+<ol>
+{{ range .Post.Children }}
+{{- if not .IsDraft}}
+  <li style="margin-bottom: 1rem;">
+    <a href="{{.WebPath}}">{{.Title}}</a>
+    <br>
+    <span>{{.PostedAt.Local.Format "January 1, 2006"}}</span>
+  </li>
+{{- end}}
+{{ end }}
+</ol>
+
+</main>
+
+{{template "footer" .}}
+{{- end}}
