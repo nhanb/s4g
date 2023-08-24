@@ -57,7 +57,7 @@ func main() {
 	serveCmd := flag.NewFlagSet("serve", flag.ExitOnError)
 	serveCmd.StringVar(&serveFolder, "f", ".", "Website's root folder")
 	serveCmd.StringVar(&serveHost, "h", "127.0.0.1", "Local server host")
-	serveCmd.StringVar(&servePort, "p", "3338", "Local server port")
+	serveCmd.StringVar(&servePort, "p", "8000", "Local server port")
 
 	switch cmd {
 	case "new":
