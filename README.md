@@ -57,3 +57,12 @@ Distant TODO. Maybe I'll write a blog post and call it a day.
 - Checked internal links (link to other article, to other article's asset)
 - Warn when linking to redirected content
 - Minify/prettify HTML
+
+# Dev notes
+
+`writeablefs` is admittedly an unnecessary abstraction. The prospect of
+replacing the native filesystem backend with something else is highly unlikely
+in the first place. I simply wanted to get used to the ergonomics of
+programming portably against an FS interface. I've already violated that in my
+recent commits anyway. When I'm sufficiently bored I'll most likely remove it
+wholesale.
