@@ -80,13 +80,22 @@ func handleNewCmd(folder string) {
 }
 
 func handleServeCmd(folder, addr string) {
-	djot.StartService()
-	fmt.Println("Started djot.js service")
-
 	absolutePath, err := filepath.Abs(folder)
 	if err != nil {
 		panic(err)
 	}
+
+	finfo, err := os.Stat(filepath.Join(absolutePath, S4gDir))
+	if err != nil || !finfo.IsDir() {
+		fmt.Printf(
+			"Error: %s doesn't have an %s folder\n",
+			absolutePath, S4gDir,
+		)
+		os.Exit(1)
+	}
+
+	djot.StartService()
+	fmt.Println("Started djot.js service")
 
 	fsys := writablefs.WriteDirFS(absolutePath)
 	site, err := ReadSiteMetadata(fsys)
@@ -165,7 +174,10 @@ func runServer(fsys writablefs.FS, webRoot, addr string) *http.Server {
 	}
 
 	go func() {
-		srv.ListenAndServe()
+		err := srv.ListenAndServe()
+		if err != nil {
+			panic(err)
+		}
 	}()
 
 	return srv

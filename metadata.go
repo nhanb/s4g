@@ -83,10 +83,19 @@ type ArticleMetadata struct {
 
 func NewSiteMetadata() SiteMetadata {
 	return SiteMetadata{
-		Root:        "/",
-		ShowFooter:  true,
-		FooterText:  `Made with <a href="https://github.com/nhanb/s4g">s4g</a>`,
-		NavbarLinks: []string{"index.dj"},
+		Address:      "http://example.com",
+		Name:         "This is my website",
+		Tagline:      "and it's fine",
+		Root:         "/",
+		ShowFooter:   true,
+		FooterText:   `Made with <a href="https://github.com/nhanb/s4g">s4g</a>`,
+		NavbarLinks:  []string{"index.dj", "#s4g#https://github.com/nhanb/s4g"},
+		DefaultThumb: "",
+
+		AuthorName:    "Scoop Newsman",
+		AuthorURI:     "https://example.com/scoop",
+		AuthorEmail:   "scoopidoo@example.com",
+		AuthorTwitter: "",
 	}
 }
 
