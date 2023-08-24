@@ -28,14 +28,14 @@ footer {
 pre,
 .sidenote {
   border: 1px solid black;
-  background-color: #eee;
   padding: 0.5rem;
 }
 pre {
-  overflow-y: scroll;
+  overflow-x: auto;
 }
 .sidenote {
   margin-left: 2rem;
+  background-color: #eee;
 }
 .sidenote p {
   margin: 0;
