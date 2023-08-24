@@ -22,7 +22,7 @@ Quality-of-life features:
 - [x] Shows user error messages on the livereloaded web page
 
 There's a sample site up at <https://nhanb.github.io/s4g/about/>.
-I'm also using s4g to generate my own blog: <https://hi.imnhan.com/>.
+I'm also using s4g to generate my own blog: <https://hi.imnhan.com/s4g>.
 
 The markup language of choice is [Djot](https://djot.net/) because it's the
 only Markdown derivative that actually tries to be both unambiguous _and_
