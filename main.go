@@ -189,7 +189,7 @@ type Link struct {
 	NewTab bool
 }
 
-const NewTabSuffix = "🡕"
+const NewTabSuffix = "↗"
 
 func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 	defer timer("Took %s")()
