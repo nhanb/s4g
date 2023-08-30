@@ -12,8 +12,6 @@ import (
 	"go.imnhan.com/s4g/writablefs"
 )
 
-var WatchedExts = []string{DjotExt, ".tmpl", ".txt"}
-
 const debounceInterval = 500 * time.Millisecond
 
 // Watches for relevant changes in FS, debounces by debounceInterval,
@@ -54,21 +52,23 @@ func WatchLocalFS(fsys writablefs.FS, callback func()) (Close func() error) {
 					return
 				}
 
-				//relPath, err := filepath.Rel(fsysPath, event.Name)
-				//if err != nil {
-				//panic(err)
-				//}
-				//fmt.Println("EVENT:", event.Op, relPath)
-
 				if shouldIgnore(event.Name) {
 					break
 				}
 
+				relPath, err := filepath.Rel(fsysPath, event.Name)
+				if err != nil {
+					panic(err)
+				}
+
 				// Avoid infinite loop
-				if event.Has(fsnotify.Write) &&
-					!contains(WatchedExts, filepath.Ext(event.Name)) {
+				if filepath.Ext(relPath) == ".html" ||
+					relPath == FeedPath ||
+					relPath == ManifestPath {
 					break
 				}
+
+				//fmt.Println("EVENT:", event.Op, relPath)
 
 				// Dynamically watch new/renamed folders
 				if event.Has(fsnotify.Create) || event.Has(fsnotify.Rename) {
