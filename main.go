@@ -184,9 +184,12 @@ func runServer(fsys writablefs.FS, webRoot, addr string) *http.Server {
 }
 
 type Link struct {
-	Text string
-	Url  string
+	Text   string
+	Url    string
+	NewTab bool
 }
+
+const NewTabSuffix = "🡕"
 
 func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 	defer timer("Took %s")()
@@ -218,6 +221,9 @@ func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 		if item[0] == '#' {
 			var link Link
 			link.Text, link.Url, _ = strings.Cut(item[1:], "#")
+			if strings.HasSuffix(link.Text, NewTabSuffix) {
+				link.NewTab = true
+			}
 			navLinks = append(navLinks, link)
 			continue
 		}
