@@ -18,6 +18,24 @@ a[target="_blank"]::after {
   content: "↗";
 }
 
+a.heading-link {
+  text-decoration: none;
+  margin-left: 0.3em;
+  visibility: hidden;
+}
+:hover > a.heading-link {
+  visibility: visible;
+}
+section:target > h2,
+section:target > h3,
+section:target > h4,
+section:target > h5,
+section:target > h6 {
+  background-color: #beefff;
+  margin-left: -1rem;
+  padding-left: 1rem;
+}
+
 main img,
 main video {
   max-width: 100%;

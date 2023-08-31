@@ -31,7 +31,22 @@ function concatTypedArray(former, latter) {
 
 function handleMessage(msg) {
   const input = new TextDecoder().decode(msg);
-  const output = djot.renderHTML(djot.parse(input));
+  const ast = djot.parse(input);
+  djot.applyFilter(ast, createHeadingLinks);
+  const output = djot.renderHTML(ast);
   const outputBytes = new TextEncoder().encode(output);
   process.stdout.write(concatTypedArray(outputBytes, END));
+}
+
+function createHeadingLinks() {
+  return {
+    section: (e) => {
+      e.children[0].children.push({
+        tag: "link",
+        destination: "#" + e.attributes.id,
+        children: [{ tag: "str", text: "#" }],
+        attributes: { class: "heading-link" },
+      });
+    },
+  };
 }
