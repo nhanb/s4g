@@ -189,7 +189,7 @@ type Link struct {
 	NewTab bool
 }
 
-const NewTabSuffix = "↗"
+const NewTabSuffix = "^"
 
 func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 	defer timer("Took %s")()
@@ -223,6 +223,7 @@ func regenerate(fsys writablefs.FS) (site *SiteMetadata, err error) {
 			link.Text, link.Url, _ = strings.Cut(item[1:], "#")
 			if strings.HasSuffix(link.Text, NewTabSuffix) {
 				link.NewTab = true
+				link.Text = strings.TrimSuffix(link.Text, NewTabSuffix)
 			}
 			navLinks = append(navLinks, link)
 			continue
